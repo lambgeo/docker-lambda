@@ -4,7 +4,6 @@ version=$(gdal-config --version)
 echo Running tests for GDAL ${version}
 
 if [[ ! "$(gdal-config --prefix | grep $PREFIX)" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(gdal-config --version | grep $GDALVERSION)" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(gdal-config --formats | grep 'openjpeg')" ]]; then echo "openjpeg NOK" && exit 1; fi
 if [[ ! "$(gdal-config --formats | grep 'gtiff')" ]]; then echo "gtiff NOK" && exit 1; fi
 if [[ ! "$(gdal-config --formats | grep 'mbtiles')" ]]; then echo "mbtiles NOK" && exit 1; fi

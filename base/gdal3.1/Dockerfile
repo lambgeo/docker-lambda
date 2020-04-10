@@ -180,9 +180,10 @@ RUN mkdir /tmp/gdal \
   && curl -sfL https://github.com/OSGeo/gdal/archive/master.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
   #&& curl -sfL https://github.com/OSGeo/gdal/archive/release/3.1.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
 
+
 RUN cd /tmp/gdal \
   && touch config.rpath \
-  && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
+  && LIBXML2_CFLAGS=$(xml2-config --cflags) LIBXML2_LIBS=$(xml2-config --libs) LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
       --disable-debug \
       --enable-lto \
       --prefix=$PREFIX \
@@ -204,10 +205,10 @@ RUN cd /tmp/gdal \
       --with-png \
       --with-proj=$PREFIX \
       --with-sqlite3=$PREFIX \
-      --with-xml2 \
+      --with-xml2=yes \
       --with-webp=$PREFIX \
       --with-zstd=$PREFIX \
-      --without-bsb \
+      --disable-driver-bsb \
       --without-cfitsio \
       --without-ecw \
       --without-fme \

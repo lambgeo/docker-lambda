@@ -206,7 +206,7 @@ RUN cd /tmp/gdal \
       --with-xml2 \
       --with-webp=$PREFIX \
       --with-zstd=$PREFIX \
-      --without-bsb \
+      --disable-driver-bsb \
       --without-cfitsio \
       --without-ecw \
       --without-fme \

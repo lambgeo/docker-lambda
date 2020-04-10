@@ -12,14 +12,16 @@ common: &common
         name: create gdal docker image
         command: |
           docker build -f base/gdal${GDAL_VERSION}/Dockerfile -t gdal${GDAL_VERSION} .
+
+    - run:
+        name: test image
+        command: |
           docker run --name lambda --volume $(pwd)/:/local -itd gdal${GDAL_VERSION} bash
           test=$(docker exec -it lambda bash -c 'cd /local/tests && sh tests.sh')
-          docker cp ./scripts/create-lambda-layer.sh lambda:/tmp/create-lambda-layer.sh
-          docker exec -it lambda bash -c '/tmp/create-lambda-layer.sh'
           docker stop lambda
           docker rm lambda
           if [[ "$test" =~ "OK" ]]; then echo "PASSED"; else exit 1; fi
-    
+
     - run:
         name: create gdal layer
         command: |
