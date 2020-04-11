@@ -5,30 +5,25 @@
 Create an **AWS lambda** like docker images and lambda layer with GDAL.
 
 
-## Images
-### GDAL - Based on lambci/lambda-base:build
+# Docker Images
+Based on lambci/lambda-base:build
   - 3.1.0 (April. 2020) - **lambgeo/lambda:gdal3.1** - Pre-release
   - 3.0.4 (April. 2020) - **lambgeo/lambda:gdal3.0** 
   - 2.4.4 (April. 2020) - **lambgeo/lambda:gdal2.4**
 
-## Lambda Layers
-
+# Lambda Layers
 We are publishing each gdal version as lambda layer on the AWS infrastructure. 
 Each layer are available for all runtimes.
 
-**gdal${version}**
-
-arn: **arn:aws:lambda:{REGION}:524387336408:layer:gdal${version}**
-
-[Full list of version and ARN](https://github.com/RemotePixel/amazonlinux/blob/master/arns.json)
-
 #### versions:
 
-gdal | version | size (Mb)| unzipped size (Mb)
-  ---|      ---|       ---|                ---
-3.1  |        1|      46.4|              136.9
-3.0  |        1|      46.4|              136.9
-2.4  |        1|      37.7|              126.2
+gdal | version | size (Mb)| unzipped size (Mb)| arn
+  ---|      ---|       ---|                ---| ---
+3.1  |        1|        24|               61.7| arn:aws:lambda:us-east-1:524387336408:layer:gdal31:1
+3.0  |        1|        23|               58.5| arn:aws:lambda:us-east-1:524387336408:layer:gdal30:1
+2.4  |        1|      14.8|               48.6| arn:aws:lambda:us-east-1:524387336408:layer:gdal24:1
+
+[Full list of version and ARN](/arns.json)
 
 #### Regions
 - ap-northeast-1
@@ -48,35 +43,53 @@ gdal | version | size (Mb)| unzipped size (Mb)
 - us-west-1
 - us-west-2
 
-### Python - Based on lambci/lambda:build-python*
+#### content
 
-Those images are here to help for the creation of lambda package or lambda layer.
+```
+layer.zip
+  |
+  |___ bin/      # Binaries
+  |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
+  |___ share/    # GDAL/PROJ data directories   
+```
+
+You may want to extent this layer by adding runtime specific code 
+
+```
+layer.zip
+  |
+  ...
+  |___ python/            # Runtime
+         |__ rasterio/
+         |__ rio_tiler/
+         |__ handler.py  
+```
+
+## Create a Python Lambda package
+
+To help the creation of lambda Python package (or complex layers) we are also creating Python (3.7 and 3.8) docker images.
 
 - **3.1**
-  - **lambgeo/lambda:gdal3.1-py3.7**
   - **lambgeo/lambda:gdal3.1-py3.8**
+  - **lambgeo/lambda:gdal3.1-py3.7**
 
 - **3.0**
-  - **lambgeo/lambda:gdal3.0-py3.7**
   - **lambgeo/lambda:gdal3.0-py3.8**
+  - **lambgeo/lambda:gdal3.0-py3.7**
 
 - **2.4**
-  - **lambgeo/lambda:gdal2.4-py3.7**
   - **lambgeo/lambda:gdal2.4-py3.8**
-
-Content: GDAL Libs and python with numpy and cython
+  - **lambgeo/lambda:gdal2.4-py3.7**
 
 Checkout [/base/python/Dockerfile](/base/python/Dockerfile) to see how to create other runtime supported images.
-
-# Create a Python Lambda package
 
 You can use the docker container to either build a full package (you provide all the libraries)
 or adapt for the use of AWS Lambda layer.
 
-## 1. Create full package (see [/examples/package](/examples/package))
-This is like we used to do before (with remotepixel/amazonlinux-gdal images)
+### 1. Create full package (see [/examples/package](/examples/package))
 
-- dockerfile
+- /Dockerfile
+
 ```Dockerfile
 FROM lambgeo/lambda:gdal3.0-py3.7
 
@@ -86,7 +99,8 @@ COPY handler.py ${PACKAGE_PREFIX}/handler.py
 RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
 ```
 
-- package.sh
+- /package.sh
+
 ```bash
 #!/bin/bash
 echo "-----------------------"
@@ -119,16 +133,16 @@ docker stop lambda
 docker rm lambda
 ```
 
-## 2. Use Lambda Layer (see [/examples/layer](/examples/layer))
+### 2. Use Lambda Layer (see [/examples/layer](/examples/layer))
 
 - dockerfile
 
-Here we install rasterio and we add our handler method. 
-The final package structure should be 
+Here we install rasterio and we add our handler method. The final package structure should be 
 
 ```
 package/
   |___ handler.py  
+  |___ mercantile/
   |___ rasterio/
 ```
 
@@ -141,8 +155,9 @@ ENV PYTHONUSERBASE=/var/task
 
 # Create a package
 COPY handler.py $PYTHONUSERBASE/handler.py
-RUN pip install --user rasterio --no-binary rasterio 
+RUN pip install numpy rasterio mercantile --no-binary :all: --user
 ```
+
 - layer.sh
 ```bash
 # We move all the package to the root directory
@@ -166,31 +181,7 @@ docker rm lambda
 
 ```
 
-# AWS Lambda Layer architecture
-
-The AWS Layer created within this repository have this architecture:
-
-```
-layer.zip
-  |
-  |___ bin/      # Binaries
-  |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
-  |___ share/    # GDAL/PROJ data directories   
-```
-
-You may want to extent this layer by adding runtime specific code 
-
-```
-layer.zip
-  |
-  ...
-  |___ python/            # Runtime
-         |__ rasterio/
-         |__ rio_tiler/
-         |__ handler.py  
-```
-
-# AWS Lambda config
+## AWS Lambda config
 - When using lambgeo gdal layer
 
   - **GDAL_DATA:** /opt/share/gdal
