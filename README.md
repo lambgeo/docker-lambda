@@ -67,18 +67,15 @@ layer.zip
 
 ## Create a Python Lambda package
 
-To help the creation of lambda Python package (or complex layers) we are also creating Python (3.7 and 3.8) docker images.
+To help the creation of lambda Python package (or complex layers) we are also creating Python (3.7) docker images.
 
 - **3.1**
-  - **lambgeo/lambda:gdal3.1-py3.8**
   - **lambgeo/lambda:gdal3.1-py3.7**
 
 - **3.0**
-  - **lambgeo/lambda:gdal3.0-py3.8**
   - **lambgeo/lambda:gdal3.0-py3.7**
 
 - **2.4**
-  - **lambgeo/lambda:gdal2.4-py3.8**
   - **lambgeo/lambda:gdal2.4-py3.7**
 
 Checkout [/base/python/Dockerfile](/base/python/Dockerfile) to see how to create other runtime supported images.

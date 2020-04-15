@@ -59,19 +59,19 @@ jobs:
     <<: *common
     environment:
       - GDAL_VERSION=3.1
-      - PYTHON_VERSIONS=3.7 3.8
+      - PYTHON_VERSIONS=3.7
 
   "gdal-3.0":
     <<: *common
     environment:
       - GDAL_VERSION=3.0
-      - PYTHON_VERSIONS=3.7 3.8
+      - PYTHON_VERSIONS=3.7
 
   "gdal-2.4":
     <<: *common
     environment:
       - GDAL_VERSION=2.4
-      - PYTHON_VERSIONS=3.7 3.8
+      - PYTHON_VERSIONS=3.7
 
   "deploy":
     docker:
