@@ -5,7 +5,7 @@ LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 ################################################################################
 # COMMON
 RUN yum makecache fast
-RUN yum install -y automake16 libpng-devel nasm
+RUN yum install -y automake16 libpng-devel libxml2-devel nasm
 
 ENV PREFIX /opt
 WORKDIR /opt
