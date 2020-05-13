@@ -1,4 +1,4 @@
-FROM lambci/lambda-base:build as builder
+FROM lambci/lambda-base-2:build as builder
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
