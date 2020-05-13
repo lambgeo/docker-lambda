@@ -99,6 +99,7 @@ RUN mkdir /tmp/hdf4 \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
   --prefix=$PREFIX \
   --with-szlib=$PREFIX \
+  --with-jpeg=$PREFIX \
   --enable-shared \
   --disable-static \
   --disable-netcdf \
