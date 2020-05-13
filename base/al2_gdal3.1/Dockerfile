@@ -84,6 +84,14 @@ RUN mkdir /tmp/szip \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/szip
 
+# libjpeg (for hdf)
+RUN mkdir /tmp/libjpeg \
+  && curl -sfL http://www.ijg.org/files/jpegsrc.v9d.tar.gz | tar zxf - -C /tmp/libjpeg --strip-components=1 \
+  && cd /tmp/libjpeg \
+  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/libjpeg
+
 # libhdf4
 RUN mkdir /tmp/hdf4 \
   && curl -sfL https://support.hdfgroup.org/ftp/HDF/releases/HDF$HDF4_VERSION/src/hdf-$HDF4_VERSION.tar | tar xvf - -C /tmp/hdf4 --strip-components=1 \
