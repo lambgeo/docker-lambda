@@ -247,7 +247,7 @@ RUN mv $PREFIX/lib64/lib* $PREFIX/lib/
 RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
 
 # Build final image
-FROM lambci/lambda-base:build  as runner
+FROM lambci/lambda-base-2:build as runner
 
 ENV PREFIX /opt
 COPY --from=builder /opt/lib/ $PREFIX/lib/
