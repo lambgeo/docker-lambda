@@ -120,6 +120,16 @@ RUN mkdir /tmp/hdf5 \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/hdf5
 
+# libcurl (for NetCDF)
+# Was getting:
+# configure: error: curl required for remote access. Install curl or build with --disable-dap.
+RUN mkdir /tmp/libcurl \
+  && curl -sfL https://curl.haxx.se/download/curl-7.70.0.tar.gz | tar zxf - -C /tmp/libcurl --strip-components=1 \
+  && cd /tmp/libcurl \
+  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/libcurl
+
 # NetCDF
 RUN mkdir /tmp/netcdf \
   && curl -sfL https://github.com/Unidata/netcdf-c/archive/v$NETCDF_VERSION.tar.gz | tar zxf - -C /tmp/netcdf --strip-components=1 \
