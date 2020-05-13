@@ -30,7 +30,8 @@ ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/$PREFIX/lib:/$PREFIX/lib64
 RUN mkdir /tmp/pkg-config \
   && curl -sfL https://pkg-config.freedesktop.org/releases/pkg-config-$PKGCONFIG_VERSION.tar.gz | tar zxf - -C /tmp/pkg-config --strip-components=1 \
   && cd /tmp/pkg-config \
-  && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+  `# https://stackoverflow.com/a/12263526/7319250` \
+  && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-internal-glib \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/pkg-config
 
