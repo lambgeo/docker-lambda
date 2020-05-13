@@ -145,13 +145,29 @@ RUN mkdir /tmp/netcdf \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/netcdf
 
-# postgres
-RUN mkdir /tmp/postgres \
-  && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz  | tar zxf - -C /tmp/postgres --strip-components=1 \
-  && cd /tmp/postgres \
-  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-openssl \
-  && make -j $(nproc) --silent && make install && make clean \
-  && rm -rf /tmp/postgres
+# # readline (for postgres)
+# RUN mkdir /tmp/readline \
+#   && curl -sfL ftp://ftp.cwru.edu/pub/bash/readline-8.0.tar.gz | tar zxf - -C /tmp/readline --strip-components=1 \
+#   && cd /tmp/readline \
+#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+#   && make -j $(nproc) --silent && make install && make clean \
+#   && rm -rf /tmp/readline
+#
+# # openssl
+# mkdir /tmp/openssl \
+#   && curl -sfL https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar zxf - -C /tmp/openssl --strip-components=1 \
+#   && cd /tmp/openssl \
+#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+#   && make -j $(nproc) --silent && make install && make clean \
+#   && rm -rf /tmp/openssl
+#
+# # postgres
+# RUN mkdir /tmp/postgres \
+#   && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz  | tar zxf - -C /tmp/postgres --strip-components=1 \
+#   && cd /tmp/postgres \
+#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-openssl --without-readline \
+#   && make -j $(nproc) --silent && make install && make clean \
+#   && rm -rf /tmp/postgres
 
 # sqlite
 RUN mkdir /tmp/sqlite \
@@ -194,13 +210,11 @@ RUN mkdir /tmp/geos \
 ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # gdal
-# Use latest commits from Github instead of release
-# "release/3.1" is the up to date 3.1.0 github branch
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/master.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
-  #&& curl -sfL https://github.com/OSGeo/gdal/archive/release/3.1.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
+  && /usr/bin/curl -sfL https://github.com/OSGeo/gdal/releases/download/v3.1.0/gdal-3.1.0.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1
 
-
+# --with-pg=yes \
+# --with-hdf4=$PREFIX \
 RUN cd /tmp/gdal \
   && touch config.rpath \
   && LIBXML2_CFLAGS=$(xml2-config --cflags) LIBXML2_LIBS=$(xml2-config --libs) LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
@@ -210,7 +224,6 @@ RUN cd /tmp/gdal \
       --with-crypto \
       --with-curl \
       --with-expat \
-      --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
       --with-hide-internal-symbols=yes \
       --with-geos=$PREFIX/bin/geos-config \
@@ -221,7 +234,6 @@ RUN cd /tmp/gdal \
       --with-rename-internal-libtiff-symbols \
       --with-netcdf=$PREFIX \
       --with-openjpeg \
-      --with-pg=yes \
       --with-png \
       --with-proj=$PREFIX \
       --with-sqlite3=$PREFIX \
