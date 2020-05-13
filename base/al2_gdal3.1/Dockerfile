@@ -5,7 +5,7 @@ LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 ################################################################################
 # COMMON
 RUN yum makecache fast
-RUN yum install -y automake16 libpng-devel libxml2-devel nasm
+RUN yum install -y automake16 libpng-devel libxml2-devel nasm readline-devel openssl-devel
 
 ENV PREFIX /opt
 WORKDIR /opt
@@ -145,29 +145,13 @@ RUN mkdir /tmp/netcdf \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/netcdf
 
-# # readline (for postgres)
-# RUN mkdir /tmp/readline \
-#   && curl -sfL ftp://ftp.cwru.edu/pub/bash/readline-8.0.tar.gz | tar zxf - -C /tmp/readline --strip-components=1 \
-#   && cd /tmp/readline \
-#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
-#   && make -j $(nproc) --silent && make install && make clean \
-#   && rm -rf /tmp/readline
-#
-# # openssl
-# mkdir /tmp/openssl \
-#   && curl -sfL https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar zxf - -C /tmp/openssl --strip-components=1 \
-#   && cd /tmp/openssl \
-#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
-#   && make -j $(nproc) --silent && make install && make clean \
-#   && rm -rf /tmp/openssl
-#
-# # postgres
-# RUN mkdir /tmp/postgres \
-#   && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz  | tar zxf - -C /tmp/postgres --strip-components=1 \
-#   && cd /tmp/postgres \
-#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-openssl --without-readline \
-#   && make -j $(nproc) --silent && make install && make clean \
-#   && rm -rf /tmp/postgres
+# postgres
+RUN mkdir /tmp/postgres \
+  && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz  | tar zxf - -C /tmp/postgres --strip-components=1 \
+  && cd /tmp/postgres \
+  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-openssl \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/postgres
 
 # sqlite
 RUN mkdir /tmp/sqlite \
@@ -213,7 +197,6 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 RUN mkdir /tmp/gdal \
   && /usr/bin/curl -sfL https://github.com/OSGeo/gdal/releases/download/v3.1.0/gdal-3.1.0.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1
 
-# --with-pg=yes \
 # --with-hdf4=$PREFIX \
 RUN cd /tmp/gdal \
   && touch config.rpath \
@@ -234,6 +217,7 @@ RUN cd /tmp/gdal \
       --with-rename-internal-libtiff-symbols \
       --with-netcdf=$PREFIX \
       --with-openjpeg \
+      --with-pg=yes \
       --with-png \
       --with-proj=$PREFIX \
       --with-sqlite3=$PREFIX \
