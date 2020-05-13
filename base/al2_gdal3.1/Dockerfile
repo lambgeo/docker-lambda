@@ -187,7 +187,6 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 RUN mkdir /tmp/gdal \
   && curl -sfL https://github.com/OSGeo/gdal/releases/download/v3.1.0/gdal-3.1.0.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1
 
-# --with-hdf4=$PREFIX \
 RUN cd /tmp/gdal \
   && touch config.rpath \
   && LIBXML2_CFLAGS=$(xml2-config --cflags) LIBXML2_LIBS=$(xml2-config --libs) LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
@@ -197,6 +196,7 @@ RUN cd /tmp/gdal \
       --with-crypto \
       --with-curl \
       --with-expat \
+      --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
       --with-hide-internal-symbols=yes \
       --with-geos=$PREFIX/bin/geos-config \
