@@ -42,9 +42,18 @@ jobs:
             mkdir /tmp/docker
             docker image save -o /tmp/docker/base-gdal${{ matrix.gdal-version }}.tar lambgeo/lambda:gdal${{ matrix.gdal-version }}
 
+      - name: Restore dependencies
+        if: steps.cache-deps.outputs.cache-hit == 'true'
+        run: |
+            docker image load -i /tmp/docker/base-gdal${{ matrix.gdal-version }}.tar
+            docker images
+
       - name: Run Tests
         run: |
-          docker run --rm lambgeo/lambda:gdal${{ matrix.gdal-version }} --volume ${{ github.workspace }}:/local sh -c "cd /local/tests && sh tests.sh"
+          docker run \
+              -v ${{ github.workspace }}:/local --rm \
+              lambgeo/lambda:gdal${{ matrix.gdal-version }} \
+              sh -c "cd /local/tests && sh tests.sh"
 
       # - name: Push to DockerHub and Publish Layer
       #   if: contains(github.ref, 'tags')
