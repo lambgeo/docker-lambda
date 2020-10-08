@@ -12,17 +12,17 @@ WORKDIR /opt
 
 # versions of packages
 ENV \
-  HDF4_VERSION=4.2.14 \
-  HDF5_VERSION=1.10.5 \
-  NETCDF_VERSION=4.6.3 \
-  LIBPNG_VERSION=1.6.36 \
-  LIBJPEG_TURBO_VERSION=2.0.4 \
+  HDF4_VERSION=4.2.15 \
+  HDF5_VERSION=1.12.0 \
+  NETCDF_VERSION=4.7.4 \
+  LIBPNG_VERSION=1.6.37 \
+  LIBJPEG_TURBO_VERSION=2.0.5 \
   OPENJPEG_VERSION=2.3.1 \
-  PG_VERSION=12.1 \
+  PG_VERSION=13.0 \
   PKGCONFIG_VERSION=0.29.2 \
   SZIP_VERSION=2.1.1 \
   WEBP_VERSION=1.1.0 \
-  ZSTD_VERSION=1.4.4
+  ZSTD_VERSION=1.4.5
 
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/$PREFIX/lib:/$PREFIX/lib64
 
@@ -135,7 +135,7 @@ RUN mkdir /tmp/postgres \
 
 # sqlite
 RUN mkdir /tmp/sqlite \
-  && curl -sfL https://www.sqlite.org/2020/sqlite-autoconf-3310100.tar.gz  | tar zxf - -C /tmp/sqlite --strip-components=1 \
+  && curl -sfL https://www.sqlite.org/2020/sqlite-autoconf-3330000.tar.gz  | tar zxf - -C /tmp/sqlite --strip-components=1 \
   && cd /tmp/sqlite \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
   && make -j $(nproc) --silent && make install && make clean \
@@ -152,7 +152,7 @@ ENV \
 # OSGEO
 ENV \
   GEOS_VERSION=3.8.1 \
-  PROJ_VERSION=6.3.1
+  PROJ_VERSION=7.1.1
 
 # proj
 RUN mkdir /tmp/proj \
@@ -215,13 +215,13 @@ RUN cd /tmp/gdal \
       --without-gif \
       --without-gnm \
       --without-lerc \
-      --without-libtool \      
+      --without-libtool \
       --without-pcraster \
       --without-pcidsk
 
 RUN cd /tmp/gdal \
   && make -j $(nproc) --silent && make install && make clean \
-  && rm -rf /tmp/gdal 
+  && rm -rf /tmp/gdal
 
 # from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
 # Install patchelf (latest with unreleased bug fixes)
@@ -235,17 +235,17 @@ RUN mkdir /tmp/patchelf \
 # Move /lib64 (libjpeg) to /lib
 RUN mv $PREFIX/lib64/lib* $PREFIX/lib/
 
-# FIX 
+# FIX
 RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
 
 # Build final image
 FROM lambci/lambda-base:build  as runner
 
 ENV PREFIX /opt
-COPY --from=builder /opt/lib/ $PREFIX/lib/ 
+COPY --from=builder /opt/lib/ $PREFIX/lib/
 COPY --from=builder /opt/include/ $PREFIX/include/
 COPY --from=builder /opt/share/ $PREFIX/share/
-COPY --from=builder /opt/bin/ $PREFIX/bin/ 
+COPY --from=builder /opt/bin/ $PREFIX/bin/
 
 ENV \
   GDAL_VERSION=3.1.0 \
