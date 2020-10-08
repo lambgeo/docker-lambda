@@ -31,9 +31,11 @@ jobs:
       - name: Cache deps
         uses: actions/cache@v2
         id: cache-deps
+        env:
+          GDAL_VERSION: ${{ matrix.gdal-version }}
         with:
           path: /tmp/docker
-          key: ${{ runner.os }}-cache-gdal-deps-${{ hashFiles('base/gdal${{ matrix.gdal-version }}/Dockerfile') }}
+          key: ${{ runner.os }}-cache-gdal-deps-${{ hashFiles('base/gdal${GDAL_VERSION}/Dockerfile') }}
 
       - name: create gdal docker image
         if: steps.cache-deps.outputs.cache-hit != 'true'
