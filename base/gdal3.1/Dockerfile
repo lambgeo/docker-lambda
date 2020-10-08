@@ -177,9 +177,7 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 # Use latest commits from Github instead of release
 # "release/3.1" is the up to date 3.1.0 github branch
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/master.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
-  #&& curl -sfL https://github.com/OSGeo/gdal/archive/release/3.1.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
-
+  && curl -sfL https://github.com/OSGeo/gdal/archive/release/3.1.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
 
 RUN cd /tmp/gdal \
   && touch config.rpath \

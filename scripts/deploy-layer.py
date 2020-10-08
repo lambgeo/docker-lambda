@@ -24,6 +24,32 @@ AWS_REGIONS = [
     "us-west-2",
 ]
 
+CompatibleRuntimes_amx1 = [
+    'nodejs',
+    'nodejs4.3',
+    'nodejs6.10',
+    'nodejs8.10',
+    'java8',
+    'python2.7',
+    'python3.6',
+    'python3.7',
+    'dotnetcore2.1',
+    'nodejs4.3-edge',
+    'go1.x',
+    'ruby2.5',
+    'provided',
+]
+
+CompatibleRuntimes_amx2 = [
+    'nodejs10.x',
+    'nodejs12.x',
+    'java11',
+    'python3.8',
+    'dotnetcore3.1',
+    'nodejs4.3-edge',
+    'ruby2.7',
+]
+
 
 def _md5(fname):
     hash_md5 = hashlib.md5()
