@@ -35,14 +35,14 @@ jobs:
           GDAL_VERSION: ${{ matrix.gdal-version }}
         with:
           path: /tmp/docker
-          key: ${{ runner.os }}-cache-gdal-deps-${{ hashFiles('base/gdal${GDAL_VERSION}/Dockerfile') }}
+          key: ${{ runner.os }}-cache-gdal${{ matrix.gdal-version }}-${{ hashFiles('**/base/gdal${GDAL_VERSION}/Dockerfile') }}
 
-      - name: create gdal docker image
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-            docker build -f base/gdal${{ matrix.gdal-version }}/Dockerfile -t lambgeo/lambda:gdal${{ matrix.gdal-version }} .
-            mkdir /tmp/docker
-            docker image save -o /tmp/docker/base-gdal${{ matrix.gdal-version }}.tar lambgeo/lambda:gdal${{ matrix.gdal-version }}
+      # - name: create gdal docker image
+      #   if: steps.cache-deps.outputs.cache-hit != 'true'
+      #   run: |
+      #       docker build -f base/gdal${{ matrix.gdal-version }}/Dockerfile -t lambgeo/lambda:gdal${{ matrix.gdal-version }} .
+      #       mkdir /tmp/docker
+      #       docker image save -o /tmp/docker/base-gdal${{ matrix.gdal-version }}.tar lambgeo/lambda:gdal${{ matrix.gdal-version }}
 
       # - name: Run Tests
       #   run: |
