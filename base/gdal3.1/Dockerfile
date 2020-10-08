@@ -12,6 +12,7 @@ WORKDIR /opt
 
 # versions of packages
 ENV \
+  LIBTIFF_VERSION=4.1.0 \
   HDF4_VERSION=4.2.15 \
   HDF5_VERSION=1.12.0 \
   NETCDF_VERSION=4.7.4 \
@@ -127,7 +128,7 @@ RUN mkdir /tmp/netcdf \
 
 # postgres
 RUN mkdir /tmp/postgres \
-  && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz  | tar zxf - -C /tmp/postgres --strip-components=1 \
+  && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz | tar zxf - -C /tmp/postgres --strip-components=1 \
   && cd /tmp/postgres \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-openssl \
   && make -j $(nproc) --silent && make install && make clean \
@@ -135,7 +136,7 @@ RUN mkdir /tmp/postgres \
 
 # sqlite
 RUN mkdir /tmp/sqlite \
-  && curl -sfL https://www.sqlite.org/2020/sqlite-autoconf-3330000.tar.gz  | tar zxf - -C /tmp/sqlite --strip-components=1 \
+  && curl -sfL https://www.sqlite.org/2020/sqlite-autoconf-3330000.tar.gz | tar zxf - -C /tmp/sqlite --strip-components=1 \
   && cd /tmp/sqlite \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
   && make -j $(nproc) --silent && make install && make clean \
@@ -146,6 +147,14 @@ ENV \
   SQLITE3_INCLUDE_DIR="${PREFIX}/include" \
   SQLITE3_CFLAGS="$CFLAGS -I${PREFIX}/include" \
   PATH=${PREFIX}/bin/:$PATH
+
+# libtiff
+RUN mkdir /tmp/libtiff \
+  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1 \
+  && cd /tmp/libtiff \
+  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/libtiff
 
 ################################################################################
 # BUILD SPECIFIC
@@ -175,7 +184,7 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # gdal
 # Use latest commits from Github instead of release
-# "release/3.1" is the up to date 3.1.0 github branch
+# "release/3.1" is the up to date 3.1.3 github branch
 RUN mkdir /tmp/gdal \
   && curl -sfL https://github.com/OSGeo/gdal/archive/release/3.1.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
 
@@ -190,12 +199,12 @@ RUN cd /tmp/gdal \
       --with-expat \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
+      --with-libtiff=$PREFIX \
       --with-hide-internal-symbols=yes \
       --with-geos=$PREFIX/bin/geos-config \
       --with-geotiff=internal \
       --with-rename-internal-libgeotiff-symbols \
       --with-jpeg=$PREFIX \
-      --with-libtiff=internal \
       --with-rename-internal-libtiff-symbols \
       --with-netcdf=$PREFIX \
       --with-openjpeg \
