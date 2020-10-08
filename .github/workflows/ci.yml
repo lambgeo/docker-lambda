@@ -34,9 +34,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          docker run --rm lambgeo/lambda:gdal${{ matrix.gdal-version }} \
-          --volume $(pwd)/:/local \
-          sh -c "cd /local/tests && sh tests.sh"
+          docker run --rm lambgeo/lambda:gdal${{ matrix.gdal-version }} --volume $(pwd)/:/local sh -c "cd /local/tests && sh tests.sh"
 
       # - name: Push to DockerHub and Publish Layer
       #   if: contains(github.ref, 'tags')
