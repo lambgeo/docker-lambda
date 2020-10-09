@@ -1,6 +1,4 @@
-# Here we create a package (like previously with amazonlambda-gdal)
-# we use the "-build" image because we don't want need pre-installed libaries
-FROM lambgeo/lambda:gdal3.0-py3.7
+FROM lambgeo/lambda-base:gdal3.0-py3.7
 
 ENV PACKAGE_PREFIX=/var/task
 

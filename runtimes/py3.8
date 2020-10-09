@@ -1,8 +1,8 @@
 ARG GDAL_VERSION
-ARG PYTHON_VERSION
 
-FROM gdal${GDAL_VERSION} as gdal
-FROM lambci/lambda:build-python${PYTHON_VERSION}
+FROM lambgeo/lambda-base-2:gdal${GDAL_VERSION} as gdal
+
+FROM lambci/lambda:build-python3.8
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
@@ -21,10 +21,10 @@ RUN \
 # -L/opt/lib -lgdal
 ENV PREFIX /opt
 
-COPY --from=gdal /opt/lib/ $PREFIX/lib/ 
+COPY --from=gdal /opt/lib/ $PREFIX/lib/
 COPY --from=gdal /opt/include/ $PREFIX/include/
 COPY --from=gdal /opt/share/ $PREFIX/share/
-COPY --from=gdal /opt/bin/ $PREFIX/bin/ 
+COPY --from=gdal /opt/bin/ $PREFIX/bin/
 
 ENV \
   GDAL_DATA=$PREFIX/share/gdal \

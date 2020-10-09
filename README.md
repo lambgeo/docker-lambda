@@ -1,34 +1,63 @@
 # GDAL based docker-lambda
 
-[![CircleCI](https://circleci.com/gh/lambgeo/docker-lambda.svg?style=svg)](https://circleci.com/gh/lambgeo/docker-lambda)
-
-Create an **AWS lambda** like docker images and lambda layer with GDAL.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/10407788/95621320-7b226080-0a3f-11eb-8194-4b55a5555836.png" style="max-width: 800px;" alt="docker-lambda"></a>
+</p>
+<p align="center">
+  <em>AWS lambda (Amazonlinux) like docker images and lambda layer with GDAL.</em>
+</p>
+<p align="center">
+  <a href="https://github.com/cogeotiff/rio-tiler/actions?query=workflow%3ACI" target="_blank">
+      <img src="https://github.com/cogeotiff/rio-tiler/workflows/CI/badge.svg" alt="Test">
+  </a>
+</p>
 
 
 # Docker Images
-Based on lambci/lambda-base:build
-  - 3.1.0 (April. 2020) - **lambgeo/lambda:gdal3.1** - Pre-release
-  - 3.0.4 (April. 2020) - **lambgeo/lambda:gdal3.0** 
-  - 2.4.4 (April. 2020) - **lambgeo/lambda:gdal2.4**
+
+Based on lambci/lambda-base:build (amazonlinux)
+  - GDAL 3.1.3 (Oct. 2020)
+    - **lambgeo/lambda-base:gdal3.1**
+    - **lambgeo/lambda:gdal3.1-py3.7**
+
+  - GDAL 2.4.4 (June 2020)
+    - **lambgeo/lambda-base:gdal2.4**
+    - **lambgeo/lambda:gdal2.4-py3.7**
+
+Based on lambci/lambda-base-2:build (amazonlinux2)
+  - GDAL 3.1.3 (Oct. 2020)
+    - **lambgeo/lambda-base-2:gdal3.1**
+    - **lambgeo/lambda:gdal3.1-py3.8**
+
+  - GDAL 2.4.4 (June 2020)
+    - **lambgeo/lambda-base-2:gdal2.4**
+    - **lambgeo/lambda:gdal2.4-py3.8**
+
 
 # Lambda Layers
-We are publishing each gdal version as lambda layer on the AWS infrastructure. 
-Each layer are available for all runtimes.
 
-#### versions:
+### **amazonlinux**
 
-gdal | version | size (Mb)| unzipped size (Mb)| arn
-  ---|      ---|       ---|                ---| ---
-3.1  |        1|        24|               61.7| arn:aws:lambda:us-east-1:524387336408:layer:gdal31:1
-3.0  |        1|        23|               58.5| arn:aws:lambda:us-east-1:524387336408:layer:gdal30:1
-2.4  |        1|      14.8|               48.6| arn:aws:lambda:us-east-1:524387336408:layer:gdal24:1
+  name | gdal | runtime | version | size (Mb)| unzipped size (Mb)| arn
+  ---|   ---|      ---|      ---|       ---|                ---| ---
+  gdal24 |   2.4.4|    All  |        2|      15.4|               50.1| arn:aws:lambda:us-east-1:524387336408:layer:gdal24:2
+  gdal31 |   3.1.3|    All  |        2|        25|               64.5| arn:aws:lambda:us-east-1:524387336408:layer:gdal31:2
+
+
+### **amazonlinux:2 (al2)**
+
+  name | gdal | runtime | version | size (Mb)| unzipped size (Mb)| arn
+  ---|   ---|      ---|      ---|       ---|                ---| ---
+  gdal24-al2 |   2.4.4|    All  |        1|        14|               41.7| arn:aws:lambda:us-east-1:524387336408:layer:gdal24-al2:1
+  gdal31-al2 |   3.1.3|    All  |        1|      22.9|               53.6| arn:aws:lambda:us-east-1:524387336408:layer:gdal31-al2:1
+
 
 [Full list of version and ARN](/arns.json)
 
-#### Regions
+### Regions
 - ap-northeast-1
 - ap-northeast-2
-- ap-south-1 
+- ap-south-1
 - ap-southeast-1
 - ap-southeast-2
 - ca-central-1
@@ -43,158 +72,30 @@ gdal | version | size (Mb)| unzipped size (Mb)| arn
 - us-west-1
 - us-west-2
 
-#### content
+### content
 
 ```
 layer.zip
   |
   |___ bin/      # Binaries
   |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
-  |___ share/    # GDAL/PROJ data directories   
-```
-
-You may want to extent this layer by adding runtime specific code 
-
-```
-layer.zip
-  |
-  ...
-  |___ python/            # Runtime
-         |__ rasterio/
-         |__ rio_tiler/
-         |__ handler.py  
-```
-
-## Create a Python Lambda package
-
-To help the creation of lambda Python package (or complex layers) we are also creating Python (3.7) docker images.
-
-- **3.1**
-  - **lambgeo/lambda:gdal3.1-py3.7**
-
-- **3.0**
-  - **lambgeo/lambda:gdal3.0-py3.7**
-
-- **2.4**
-  - **lambgeo/lambda:gdal2.4-py3.7**
-
-Checkout [/base/python/Dockerfile](/base/python/Dockerfile) to see how to create other runtime supported images.
-
-You can use the docker container to either build a full package (you provide all the libraries)
-or adapt for the use of AWS Lambda layer.
-
-### 1. Create full package (see [/examples/package](/examples/package))
-
-- /Dockerfile
-
-```Dockerfile
-FROM lambgeo/lambda:gdal3.0-py3.7
-
-ENV PACKAGE_PREFIX=/var/task
-
-COPY handler.py ${PACKAGE_PREFIX}/handler.py
-RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
-```
-
-- /package.sh
-
-```bash
-#!/bin/bash
-echo "-----------------------"
-echo "Creating lambda package"
-echo "-----------------------"
-echo "Remove lambda python packages"
-rm -rdf $PACKAGE_PREFIX/boto3/ \
-  && rm -rdf $PACKAGE_PREFIX/botocore/ \
-  && rm -rdf $PACKAGE_PREFIX/docutils/ \
-  && rm -rdf $PACKAGE_PREFIX/dateutil/ \
-  && rm -rdf $PACKAGE_PREFIX/jmespath/ \
-  && rm -rdf $PACKAGE_PREFIX/s3transfer/ \
-  && rm -rdf $PACKAGE_PREFIX/numpy/doc/
-
-echo "Strip shared libraries"
-cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
-
-echo "Create archive"
-cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
-cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so* share bin
-cp /tmp/package.zip /local/package.zip
-```
-
-- commands
-```bash
-docker build --tag package:latest .
-docker run --name lambda -w /var/task --volume $(shell pwd)/:/local -itd package:latest bash
-docker exec -it lambda bash '/local/package.sh'
-docker stop lambda
-docker rm lambda
-```
-
-### 2. Use Lambda Layer (see [/examples/layer](/examples/layer))
-
-- dockerfile
-
-Here we install rasterio and we add our handler method. The final package structure should be 
-
-```
-package/
-  |___ handler.py  
-  |___ mercantile/
-  |___ rasterio/
-```
-
-```Dockerfile
-FROM lambgeo/lambda:gdal3.0-py3.7
-
-# Basically we don't want to replicated existant modules found in the layer ($PYTHONPATH)
-# So we use the $PYTHONUSERBASE trick to set the output directory
-ENV PYTHONUSERBASE=/var/task
-
-# Create a package
-COPY handler.py $PYTHONUSERBASE/handler.py
-RUN pip install numpy rasterio mercantile --no-binary :all: --user
-```
-
-- layer.sh
-```bash
-# We move all the package to the root directory
-version=$(python -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
-PYPATH=${PYTHONUSERBASE}/lib/python${version}/site-packages/
-mv ${PYPATH}/* ${PYTHONUSERBASE}/
-rm -rf ${PYTHONUSERBASE}/lib
-
-echo "Create archive"
-cd $PYTHONUSERBASE && zip -r9q /tmp/layer.zip *
-
-cp /tmp/layer.zip /local/layer.zip
-```
-- commands
-```bash
-docker build --tag package:latest .
-docker run --name lambda -w /var/task --volume $(shell pwd)/:/local -itd package:latest bash
-docker exec -it lambda bash '/local/layer.sh'
-docker stop lambda
-docker rm lambda
-
+  |___ share/    # GDAL/PROJ data directories
 ```
 
 ## AWS Lambda config
+
+When using lambgeo layer you **HAVE TO** set GDAL_DATA and PROJ_LIB environment variable.
+
 - When using lambgeo gdal layer
 
   - **GDAL_DATA:** /opt/share/gdal
   - **PROJ_LIB:** /opt/share/proj
 
-- When creating full package
+- If you create a package using the gdalX.X docker image.
+
   - **GDAL_DATA:** /var/task/share/gdal
   - **PROJ_LIB:** /var/task/share/proj
 
-### Other variable for optimal config
-- **GDAL_CACHEMAX:** 512
-- **VSI_CACHE:** TRUE
-- **VSI_CACHE_SIZE:** 536870912
-- **CPL_TMPDIR:** "/tmp"
-- **GDAL_HTTP_MERGE_CONSECUTIVE_RANGES:** YES
-- **GDAL_HTTP_MULTIPLEX:** YES
-- **GDAL_HTTP_VERSION:** 2
-- **GDAL_DISABLE_READDIR_ON_OPEN:** "EMPTY_DIR"
-- **CPL_VSIL_CURL_ALLOWED_EXTENSIONS:** ".tif"
+### Other variable
+
+Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote grids: https://proj.org/usage/network.html
