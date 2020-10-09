@@ -1,7 +1,7 @@
 # GDAL based docker-lambda
 
 <p align="center">
-  <img src="" style="max-width: 800px;" alt="docker-lambda"></a>
+  <img src="https://user-images.githubusercontent.com/10407788/95621320-7b226080-0a3f-11eb-8194-4b55a5555836.png" style="max-width: 800px;" alt="docker-lambda"></a>
 </p>
 <p align="center">
   <em>AWS lambda (Amazonlinux) like docker images and lambda layer with GDAL.</em>
@@ -81,3 +81,21 @@ layer.zip
   |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
   |___ share/    # GDAL/PROJ data directories
 ```
+
+## AWS Lambda config
+
+When using lambgeo layer you **HAVE TO** set GDAL_DATA and PROJ_LIB environment variable.
+
+- When using lambgeo gdal layer
+
+  - **GDAL_DATA:** /opt/share/gdal
+  - **PROJ_LIB:** /opt/share/proj
+
+- If you create a package using the gdalX.X docker image.
+
+  - **GDAL_DATA:** /var/task/share/gdal
+  - **PROJ_LIB:** /var/task/share/proj
+
+### Other variable
+
+Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote grids: https://proj.org/usage/network.html
