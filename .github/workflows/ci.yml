@@ -41,7 +41,7 @@ jobs:
             docker image save -o /tmp/docker/${{ matrix.image-name }}.tar ${{ matrix.image-name }}:build
 
       - name: Restore base image
-        if: steps.common-cache.outputs.cache-hit != 'true'
+        if: steps.common-cache.outputs.cache-hit == 'true'
         run: |
             docker image load -i /tmp/docker/${{ matrix.image-name }}.tar
             docker images
@@ -92,13 +92,13 @@ jobs:
 
           python scripts/deploy-layer.py package.zip ${{ matrix.gdal-version }} ${{ matrix.image-version }}
 
-  base_runtime:
+  runtimes:
       needs: [build]
       runs-on: ubuntu-latest
       if: contains(github.ref, 'tags')
       strategy:
         matrix:
-          gdal-version: [2.4, 3.1]
+          runtimes: [py3.7, py3.8]
       steps:
         - uses: actions/checkout@v2
         - name: Login to DockerHub
@@ -109,41 +109,12 @@ jobs:
 
         - name: Push to DockerHub
           env:
-              RUNTIMES: "py3.7"
+              GDAL_VERSIONS: "2.4 3.1"
           run: |
-            for RUNTIME in ${RUNTIMES}; do
+            for GDAL_VERSION in ${GDAL_VERSIONS}; do
               docker build \
-                  --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
-                  -f runtimes/${RUNTIME} \
-                  -t lambgeo/lambda-base:gdal${{ matrix.gdal-version }}-${RUNTIME} .
-
-              docker push lambgeo/lambda-base:gdal${{ matrix.gdal-version }}-${RUNTIME}
-            done
-
-  base2_runtime:
-      needs: [build]
-      runs-on: ubuntu-latest
-      if: contains(github.ref, 'tags')
-      strategy:
-        matrix:
-          gdal-version: [2.4, 3.1]
-      steps:
-        - uses: actions/checkout@v2
-        - name: Login to DockerHub
-          uses: docker/login-action@v1
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-        - name: Push to DockerHub
-          env:
-              RUNTIMES: "py3.8"
-          run: |
-            for RUNTIME in ${RUNTIMES}; do
-              docker build \
-                  --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
-                  -f runtimes/${RUNTIME} \
-                  -t lambgeo/lambda-base-2:gdal${{ matrix.gdal-version }}-${RUNTIME} .
-
-              docker push lambgeo/lambda-base-2:gdal${{ matrix.gdal-version }}-${RUNTIME}
+                  --build-arg GDAL_VERSION=${GDAL_VERSION} \
+                  -f runtimes/${{ matrix.runtimes }} \
+                  -t lambgeo/lambda:gdal${GDAL_VERSION}-${{ matrix.runtimes }} .
+              docker push lambgeo/lambda:gdal${GDAL_VERSION}-${{ matrix.runtimes }}
             done

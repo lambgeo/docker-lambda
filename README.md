@@ -18,20 +18,20 @@
 Based on lambci/lambda-base:build (amazonlinux)
   - GDAL 3.1.3 (Oct. 2020)
     - **lambgeo/lambda-base:gdal3.1**
-    - **lambgeo/lambda-base:gdal3.1-py3.7**
+    - **lambgeo/lambda:gdal3.1-py3.7**
 
   - GDAL 2.4.4 (June 2020)
     - **lambgeo/lambda-base:gdal2.4**
-    - **lambgeo/lambda-base:gdal2.4-py3.7**
+    - **lambgeo/lambda:gdal2.4-py3.7**
 
 Based on lambci/lambda-base-2:build (amazonlinux2)
   - GDAL 3.1.3 (Oct. 2020)
     - **lambgeo/lambda-base-2:gdal3.1**
-    - **lambgeo/lambda-base-2:gdal3.1-py3.8**
+    - **lambgeo/lambda:gdal3.1-py3.8**
 
   - GDAL 2.4.4 (June 2020)
     - **lambgeo/lambda-base-2:gdal2.4**
-    - **lambgeo/lambda-base-2:gdal2.4-py3.8**
+    - **lambgeo/lambda:gdal2.4-py3.8**
 
 
 # Lambda Layers
