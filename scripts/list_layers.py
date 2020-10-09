@@ -22,7 +22,7 @@ regions = [
 ]
 
 
-layers = ["gdal24", "gdal30", "gdal31"]
+layers = ["gdal24", "gdal31"]
 
 
 def main():

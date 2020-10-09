@@ -1,5 +1,3 @@
-
-
 import click
 import hashlib
 
@@ -25,29 +23,25 @@ AWS_REGIONS = [
 ]
 
 CompatibleRuntimes_amx1 = [
-    'nodejs',
-    'nodejs4.3',
-    'nodejs6.10',
-    'nodejs8.10',
-    'java8',
-    'python2.7',
-    'python3.6',
-    'python3.7',
-    'dotnetcore2.1',
-    'nodejs4.3-edge',
-    'go1.x',
-    'ruby2.5',
-    'provided',
+    "java8",
+    "python2.7",
+    "python3.6",
+    "python3.7",
+    "dotnetcore2.1",
+    "go1.x",
+    "ruby2.5",
+    "provided",
 ]
 
 CompatibleRuntimes_amx2 = [
-    'nodejs10.x',
-    'nodejs12.x',
-    'java11',
-    'python3.8',
-    'dotnetcore3.1',
-    'nodejs4.3-edge',
-    'ruby2.7',
+    "nodejs10.x",
+    "nodejs12.x",
+    "java11",
+    "java8.al2",
+    "python3.8",
+    "dotnetcore3.1",
+    "ruby2.7",
+    "provided.al2",
 ]
 
 
@@ -60,13 +54,24 @@ def _md5(fname):
 
 
 @click.command()
-@click.argument('gdalversion', type=str)
-def main(gdalversion):
-    local_name = f"gdal{gdalversion}.zip"
-    next_layer_sha = _md5(local_name)
+@click.argument("package", type=str)
+@click.argument("gdalversion", type=str)
+@click.argument("image_version", type=str)
+def main(package, gdalversion, image_version):
+    """Deploy Lambda Package."""
+    next_layer_sha = _md5(package)
+
+    if image_version == "base":
+        suffix = ""
+        supported = CompatibleRuntimes_amx1
+    elif image_version == "base-2":
+        suffix = "-al2"
+        supported = CompatibleRuntimes_amx2
+    else:
+        raise Exception("Invalid Base")
 
     gdalversion_nodot = gdalversion.replace(".", "")
-    layer_name = f"gdal{gdalversion_nodot}"
+    layer_name = f"gdal{gdalversion_nodot}{suffix}"
     description = f"Lambda Layer with GDAL{gdalversion} - {next_layer_sha}"
 
     session = boto3_session()
@@ -93,25 +98,26 @@ def main(gdalversion):
             click.echo("No update needed", err=True)
             continue
 
-        click.echo(f"Publishing new version", err=True)
-        with open(local_name, 'rb') as zf:
+        click.echo("Publishing new version", err=True)
+        with open(package, "rb") as zf:
             res = client.publish_layer_version(
                 LayerName=layer_name,
                 Content={"ZipFile": zf.read()},
                 Description=description,
-                LicenseInfo="MIT"
+                LicenseInfo="MIT",
+                CompatibleRuntimes=supported,
             )
             version = res["Version"]
 
-        click.echo(f"Adding permission", err=True)
+        click.echo("Adding permission", err=True)
         client.add_layer_version_permission(
             LayerName=layer_name,
             VersionNumber=version,
-            StatementId='make_public',
-            Action='lambda:GetLayerVersion',
-            Principal='*',
+            StatementId="make_public",
+            Action="lambda:GetLayerVersion",
+            Principal="*",
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

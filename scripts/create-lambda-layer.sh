@@ -3,8 +3,6 @@ echo "-----------------------"
 echo "Creating lambda layer"
 echo "-----------------------"
 
-ARCHIVE_NAME=gdal"$(gdal-config --version | cut -b 1-3)"
-
 echo "Remove useless files"
 rm -rdf $PREFIX/share/doc \
 && rm -rdf $PREFIX/share/man \
@@ -18,4 +16,4 @@ cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so*
 cd $PREFIX && zip -r9q --symlinks /tmp/package.zip share
 cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack
 
-cp /tmp/package.zip /local/${ARCHIVE_NAME}.zip
+cp /tmp/package.zip /local/package.zip

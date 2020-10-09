@@ -1,8 +1,8 @@
 ARG GDAL_VERSION
 
-FROM lambgeo/lambda:gdal${GDAL_VERSION} as gdal
+FROM lambgeo/lambda-base-2:gdal${GDAL_VERSION} as gdal
 
-FROM lambci/lambda:build-python3.7
+FROM lambci/lambda:build-python3.8
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
