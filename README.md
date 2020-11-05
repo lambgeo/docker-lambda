@@ -1,3 +1,8 @@
+# STATUS: WIP
+
+This project is currently in a Work In Progress status. We are doing a global refactor.
+For the stable version of the docs please refer to https://github.com/lambgeo/docker-lambda/tree/ef66339724b1b7e1a375df912dfd58a9c59ac109
+
 # GDAL based docker-lambda
 
 <p align="center">
