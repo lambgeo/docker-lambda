@@ -109,7 +109,7 @@ COPY --from=builder /opt/share/ $PREFIX/share/
 COPY --from=builder /opt/bin/ $PREFIX/bin/
 
 ENV \
-  GDAL_VERSION=3.1.0 \
+  GDAL_VERSION=3.2.0 \
   GDAL_DATA=$PREFIX/share/gdal \
   PROJ_LIB=$PREFIX/share/proj \
   GDAL_CONFIG=$PREFIX/bin/gdal-config \
