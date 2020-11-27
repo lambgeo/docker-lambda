@@ -3,13 +3,13 @@
 This project is currently in a Work In Progress status. We are doing a global refactor.
 For the stable version of the docs please refer to https://github.com/lambgeo/docker-lambda/tree/ef66339724b1b7e1a375df912dfd58a9c59ac109
 
-# GDAL based docker-lambda
+# GDAL based docker image made for AWS Lambda
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/10407788/95621320-7b226080-0a3f-11eb-8194-4b55a5555836.png" style="max-width: 800px;" alt="docker-lambda"></a>
 </p>
 <p align="center">
-  <em>AWS lambda (Amazonlinux) like docker images and lambda layer with GDAL.</em>
+  <em>AWS lambda (Amazonlinux) like docker images with GDAL.</em>
 </p>
 <p align="center">
   <a href="https://github.com/cogeotiff/rio-tiler/actions?query=workflow%3ACI" target="_blank">
@@ -21,85 +21,95 @@ For the stable version of the docs please refer to https://github.com/lambgeo/do
 # Docker Images
 
 Based on lambci/lambda-base:build (amazonlinux)
-  - GDAL 3.1.3 (Oct. 2020)
-    - **lambgeo/lambda-base:gdal3.1**
-    - **lambgeo/lambda:gdal3.1-py3.7**
+  - GDAL 3.2.0 (Oct. 2020)
+    - **lambgeo/lambda-gdal:3.2**
+    - **lambgeo/lambda-gdal:3.2-py3.7**
+
+  - GDAL 3.1.4 (Oct. 2020)
+    - **lambgeo/lambda-gdal:3.1**
+    - **lambgeo/lambda-gdal:3.1-py3.7**
 
   - GDAL 2.4.4 (June 2020)
-    - **lambgeo/lambda-base:gdal2.4**
-    - **lambgeo/lambda:gdal2.4-py3.7**
+    - **lambgeo/lambda-gdal:2.4**
+    - **lambgeo/lambda-gdal:2.4-py3.7**
 
-Based on lambci/lambda-base-2:build (amazonlinux2)
-  - GDAL 3.1.3 (Oct. 2020)
-    - **lambgeo/lambda-base-2:gdal3.1**
-    - **lambgeo/lambda:gdal3.1-py3.8**
+Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g python 3.8)
+  - GDAL 3.2.0 (Oct. 2020)
+    - **lambgeo/lambda2-gdal:3.2**
+    - **lambgeo/lambda2-gdal:3.2-py3.8**
+
+  - GDAL 3.1.4 (Oct. 2020)
+    - **lambgeo/lambda2-gdal:3.1**
+    - **lambgeo/lambda2-gdal:3.1-py3.8**
 
   - GDAL 2.4.4 (June 2020)
-    - **lambgeo/lambda-base-2:gdal2.4**
-    - **lambgeo/lambda:gdal2.4-py3.8**
+    - **lambgeo/lambda2-gdal:2.4**
+    - **lambgeo/lambda2-gdal:2.4-py3.8**
 
+## Creating Lambda packages
 
-# Lambda Layers
+1. Dockerfile
 
-### **amazonlinux**
+```Dockerfile
+FROM lambgeo/lambda2-gdal:3.2-py3.8
 
-  name | gdal | runtime | version | size (Mb)| unzipped size (Mb)| arn
-  ---|   ---|      ---|      ---|       ---|                ---| ---
-  gdal24 |   2.4.4|    All  |        2|      15.4|               50.1| arn:aws:lambda:us-east-1:524387336408:layer:gdal24:2
-  gdal31 |   3.1.3|    All  |        2|        25|               64.5| arn:aws:lambda:us-east-1:524387336408:layer:gdal31:2
+ENV PACKAGE_PREFIX=/var/task
 
+# Copy any local files to the package
+COPY handler.py ${PACKAGE_PREFIX}/handler.py
 
-### **amazonlinux:2 (al2)**
+# Install some requirements
+RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
 
-  name | gdal | runtime | version | size (Mb)| unzipped size (Mb)| arn
-  ---|   ---|      ---|      ---|       ---|                ---| ---
-  gdal24-al2 |   2.4.4|    All  |        1|        14|               41.7| arn:aws:lambda:us-east-1:524387336408:layer:gdal24-al2:1
-  gdal31-al2 |   3.1.3|    All  |        1|      22.9|               53.6| arn:aws:lambda:us-east-1:524387336408:layer:gdal31-al2:1
+# Cleanup the package of useless files
+RUN rm -rdf $PACKAGE_PREFIX/boto3/ \
+  && rm -rdf $PACKAGE_PREFIX/botocore/ \
+  && rm -rdf $PACKAGE_PREFIX/docutils/ \
+  && rm -rdf $PACKAGE_PREFIX/dateutil/ \
+  && rm -rdf $PACKAGE_PREFIX/jmespath/ \
+  && rm -rdf $PACKAGE_PREFIX/s3transfer/ \
+  && rm -rdf $PACKAGE_PREFIX/numpy/doc/ \
+  && rm -rdf $PREFIX/share/doc \
+  && rm -rdf $PREFIX/share/man \
+  && rm -rdf $PREFIX/share/hdf*
 
+# Reduce size of the C libs
+RUN cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
 
-[Full list of version and ARN](/arns.json)
+# Copy python files
+RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 
-### Regions
-- ap-northeast-1
-- ap-northeast-2
-- ap-south-1
-- ap-southeast-1
-- ap-southeast-2
-- ca-central-1
-- eu-central-1
-- eu-north-1
-- eu-west-1
-- eu-west-2
-- eu-west-3
-- sa-east-1
-- us-east-1
-- us-east-2
-- us-west-1
-- us-west-2
-
-### content
-
+# Copy shared libs
+RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so* share
+RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack
 ```
-layer.zip
+
+2. Build and create package.zip
+
+```bash
+docker build --tag package:latest .
+docker run --name lambda -w /var/task --volume $(shell pwd)/:/local -itd package:latest bash
+docker cp lambda:/tmp/package.zip package.zip
+docker stop lambda
+docker rm lambda
+```
+Package content should be like:
+```
+package.zip
   |
-  |___ bin/      # Binaries
   |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
   |___ share/    # GDAL/PROJ data directories
+  |___ rasterio/
+  ....
+  |___ handler.py
+  |___ other python module
 ```
 
-## AWS Lambda config
+3. Deploy and Set Environment variables
 
-When using lambgeo layer you **HAVE TO** set GDAL_DATA and PROJ_LIB environment variable.
-
-- When using lambgeo gdal layer
-
-  - **GDAL_DATA:** /opt/share/gdal
-  - **PROJ_LIB:** /opt/share/proj
-
-- If you create a package using the gdalX.X docker image.
-
-  - **GDAL_DATA:** /var/task/share/gdal
-  - **PROJ_LIB:** /var/task/share/proj
+For Rasterio or other libraries to be aware of GDAL/PROJ C libraries, you need to set up those 2 envs:
+- **GDAL_DATA:** /var/task/share/gdal
+- **PROJ_LIB:** /var/task/share/proj
 
 ### Other variable
 
