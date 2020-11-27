@@ -29,9 +29,6 @@ jobs:
         if: steps.common-cache.outputs.cache-hit == 'true'
         run: docker image load -i /tmp/docker/${{ matrix.image-name }}.tar
 
-      - name: Build Common image
-        run: docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
-
       - name: Build and Cache Common image
         if: steps.common-cache.outputs.cache-hit != 'true'
         run: |
