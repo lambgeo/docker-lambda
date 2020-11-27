@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         image-name: ['lambda', 'lambda2']
-        gdal-version: [2.4, 3.1]
+        gdal-version: [2.4, 3.1, 3.2]
     steps:
       - uses: actions/checkout@v2
       - name: Login to DockerHub
@@ -25,16 +25,17 @@ jobs:
           path: /tmp/docker
           key: ${{ matrix.image-name }}-${{ hashFiles(format('common/{0}/Dockerfile', matrix.image-name)) }}
 
-      - name: Restore base image
+      - name: Restore Common image
         if: steps.common-cache.outputs.cache-hit == 'true'
         run: docker image load -i /tmp/docker/${{ matrix.image-name }}.tar
 
-      - name: Build base image
+      - name: Build Common image
         run: docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
 
-      - name: Save base image in Cache
+      - name: Build and Cache Common image
         if: steps.common-cache.outputs.cache-hit != 'true'
         run: |
+          run: docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
           mkdir -p /tmp/docker
           docker image save -o /tmp/docker/${{ matrix.image-name }}.tar ${{ matrix.image-name }}:build
 
