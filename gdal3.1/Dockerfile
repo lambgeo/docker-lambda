@@ -90,6 +90,7 @@ RUN cd /tmp/gdal \
       --enable-driver-wms \
       --enable-driver-mbtiles \
       --enable-driver-gpkg \
+      --enable-driver-gml \
       --enable-driver-pgdump
 
 RUN cd /tmp/gdal \
