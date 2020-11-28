@@ -78,7 +78,8 @@ RUN cd /tmp/gdal \
       --without-lerc \
       --without-libtool \
       --without-pcraster \
-      --without-pcidsk
+      --without-pcidsk \
+      --disable-driver-elastic
 
 RUN cd /tmp/gdal \
   && make -j $(nproc) --silent && make install && make clean \
