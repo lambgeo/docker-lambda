@@ -37,7 +37,7 @@ jobs:
       - name: Build and Cache Common image
         if: steps.common-cache.outputs.cache-hit != 'true'
         run: |
-          run: docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
+          docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
           mkdir -p /tmp/docker
           docker image save -o /tmp/docker/${{ matrix.image-name }}.tar ${{ matrix.image-name }}:build
 
