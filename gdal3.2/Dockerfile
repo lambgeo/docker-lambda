@@ -89,7 +89,8 @@ RUN cd /tmp/gdal \
       --enable-driver-wmts \
       --enable-driver-wms \
       --enable-driver-mbtiles \
-      --enable-driver-gpkg
+      --enable-driver-gpkg \
+      --enable-driver-pgdump
 
 RUN cd /tmp/gdal \
   && make -j $(nproc) --silent && make install \
