@@ -11,7 +11,7 @@ RUN mkdir /tmp/proj \
    && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
    && cd /tmp/proj \
    && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
-   && make -j $(nproc) --silent && make install && make clean \
+   && make -j $(nproc) --silent && make install \
    && rm -rf /tmp/proj
 
 # geos
@@ -19,7 +19,7 @@ RUN mkdir /tmp/geos \
   && curl -sfL http://download.osgeo.org/geos/geos-$GEOS_VERSION.tar.bz2 | tar jxf - -C /tmp/geos --strip-components=1 \
   && cd /tmp/geos \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
-  && make -j $(nproc) --silent && make install && make clean \
+  && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/geos
 
 ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
@@ -71,7 +71,7 @@ RUN cd /tmp/gdal \
       --without-pcidsk
 
 RUN cd /tmp/gdal \
-  && make -j $(nproc) --silent && make install && make clean \
+  && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/gdal
 
 # from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
@@ -80,7 +80,7 @@ ENV PATCHELF_VERSION 0.10
 RUN mkdir /tmp/patchelf \
   && curl -sfL https://github.com/NixOS/patchelf/archive/$PATCHELF_VERSION.tar.gz | tar zxf - -C /tmp/patchelf --strip-components=1 \
   && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
-  && make -j $(nproc) --silent && make install && make clean \
+  && make -j $(nproc) --silent && make install \
   && cd / && rm -rf /tmp/patchelf
 
 # Move /lib64 (libjpeg) to /lib
