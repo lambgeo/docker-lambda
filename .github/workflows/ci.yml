@@ -20,7 +20,7 @@ jobs:
 
       - name: set amazonlinux version
         id: amazonlinux
-        run: echo "::set-output name=version::$(echo ${{ matrix.image-name }} | sed -E 's/base(-)?//g' )"
+        run: echo "::set-output name=version::$(if [ '${{ matrix.image-name }}' == 'base-2' ]; then echo '-al2'; else echo ''; fi)"
         shell: bash
 
       - name: setup Common cache
@@ -58,27 +58,27 @@ jobs:
           docker build \
             --build-arg IMAGE_VERSION=${{ matrix.image-name }} \
             -f gdal${{ matrix.gdal-version }}/Dockerfile \
-            -t lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }} .
+            -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }} .
           mkdir -p /tmp/docker
           docker image save \
             -o /tmp/docker/${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar \
-            lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}
+            lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }}
 
       - name: Run Tests
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }} \
+            lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }} \
             sh -c "cd /local/tests && sh tests.sh"
 
       - name: Push to DockerHub
         if: github.ref == 'refs/heads/master'
-        run: docker push lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}
+        run: docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }}
 
       - name: Build Runtime and Push to DockerHub
         if: github.ref == 'refs/heads/master'
         run: |
-          runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
+          runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '-al2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
           for runtime in ${runtimes}; do
             docker build \
               --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \

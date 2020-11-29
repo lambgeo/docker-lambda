@@ -33,13 +33,13 @@ Based on lambci/lambda-base:build (amazonlinux)
 
 Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g python 3.8)
   - GDAL 3.2.0 (Oct. 2020)
-    - **lambgeo/lambda2-gdal:3.2**
+    - **lambgeo/lambda-gdal:3.2-al2**
 
   - GDAL 3.1.4 (Oct. 2020)
-    - **lambgeo/lambda2-gdal:3.1**
+    - **lambgeo/lambda-gdal:3.1-al2**
 
   - GDAL 2.4.4 (June 2020)
-    - **lambgeo/lambda2-gdal:2.4**
+    - **lambgeo/lambda-gdal:2.4-al2**
 
   - For python 3.8
     - **lambgeo/lambda-gdal:3.2-python3.8**
