@@ -1,7 +1,3 @@
-# STATUS: WIP
-
-This project is currently in a Work In Progress status. We are doing a global refactor.
-For the stable version of the docs please refer to https://github.com/lambgeo/docker-lambda/tree/ef66339724b1b7e1a375df912dfd58a9c59ac109
 
 # GDAL based docker image made for AWS Lambda
 
@@ -118,3 +114,8 @@ For Rasterio or other libraries to be aware of GDAL/PROJ C libraries, you need t
 ### Other variable
 
 Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote grids: https://proj.org/usage/network.html
+
+
+### Refactor
+
+We recently refactored the repo, to see old documentation please refer to https://github.com/lambgeo/docker-lambda/tree/ef66339724b1b7e1a375df912dfd58a9c59ac109

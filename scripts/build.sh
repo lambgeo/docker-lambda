@@ -19,4 +19,4 @@ docker build \
 docker build \
     --build-arg GDAL_VERSION=${GDAL_VERSION} \
     -f runtimes/${RUNTIME} \
-    -t lambgeo/lambda${LAMBDA_VERSION}-gdal:${GDAL_VERSION}-${RUNTIME} .
+    -t lambgeo/lambda-gdal:${GDAL_VERSION}-${RUNTIME} .

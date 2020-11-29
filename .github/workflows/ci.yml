@@ -72,11 +72,11 @@ jobs:
             sh -c "cd /local/tests && sh tests.sh"
 
       - name: Push to DockerHub
-        if: contains(github.ref, 'tags')
+        if: github.ref == 'refs/heads/master'
         run: docker push lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}
 
       - name: Build Runtime and Push to DockerHub
-        # if: contains(github.ref, 'tags')
+        if: github.ref == 'refs/heads/master'
         run: |
           runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
           for runtime in ${runtimes}; do
@@ -84,5 +84,5 @@ jobs:
               --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
               -f runtimes/${runtime} \
               -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime} .
+            docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime}
           done
-        #  docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime}
