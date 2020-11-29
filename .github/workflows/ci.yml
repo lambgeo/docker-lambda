@@ -81,8 +81,8 @@ jobs:
           runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
           for runtime in ${runtimes}; do
             docker build \
-              --build-arg GDAL_VERSION=${GDAL_VERSION} \
+              --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
               -f runtimes/${runtime} \
-              -t lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}-${runtime} .
+              -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime} .
           done
-        #  docker push lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${GDAL_VERSION}-${runtime}
+        #  docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime}
