@@ -1,6 +1,6 @@
 ARG GDAL_VERSION
 
-FROM lambgeo/lambda:gdal${GDAL_VERSION} as gdal
+FROM lambgeo/lambda-gdal:${GDAL_VERSION} as gdal
 
 FROM lambci/lambda:build-python3.7
 

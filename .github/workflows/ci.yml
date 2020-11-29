@@ -75,29 +75,14 @@ jobs:
         if: contains(github.ref, 'tags')
         run: docker push lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}
 
-  # runtimes:
-  #     needs: [build]
-  #     runs-on: ubuntu-latest
-  #     if: contains(github.ref, 'tags')
-  #     strategy:
-  #       matrix:
-  #         runtimes: [py3.7, py3.8]
-  #     steps:
-  #       - uses: actions/checkout@v2
-  #       - name: Login to DockerHub
-  #         uses: docker/login-action@v1
-  #         with:
-  #           username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  #       - name: Push to DockerHub
-  #         env:
-  #             GDAL_VERSIONS: "2.4 3.1 3.2"
-  #         run: |
-  #           for GDAL_VERSION in ${GDAL_VERSIONS}; do
-  #             docker build \
-  #               --build-arg GDAL_VERSION=${GDAL_VERSION} \
-  #               -f runtimes/${{ matrix.runtimes }} \
-  #               -t lambgeo/lambda-gdal:${GDAL_VERSION}-${{ matrix.runtimes }} .
-  #             docker push lambgeo/lambda-gdal:${GDAL_VERSION}-${{ matrix.runtimes }}
-  #           done
+      - name: Build Runtime and Push to DockerHub
+        # if: contains(github.ref, 'tags')
+        run: |
+          runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
+          for runtime in ${runtimes}; do
+            docker build \
+              --build-arg GDAL_VERSION=${GDAL_VERSION} \
+              -f runtimes/${runtime} \
+              -t lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}-${runtime} .
+          done
+        #  docker push lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${GDAL_VERSION}-${runtime}
