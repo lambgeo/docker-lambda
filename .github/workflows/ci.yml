@@ -8,45 +8,40 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        image-name: [base, base-2]
-        gdal-version: [2.4, 3.1]
+        image-name: ['base', 'base-2']
+        gdal-version: [2.4, 3.1, 3.2]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: "3.x"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install boto3 click
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Common build cache
+      - name: set amazonlinux version
+        id: amazonlinux
+        run: echo "::set-output name=version::$(echo ${{ matrix.image-name }} | sed -E 's/base(-)?//g' )"
+        shell: bash
+
+      - name: setup Common cache
         uses: actions/cache@v2
         id: common-cache
         with:
           path: /tmp/docker
           key: ${{ matrix.image-name }}-${{ hashFiles(format('common/{0}/Dockerfile', matrix.image-name)) }}
 
-      - name: Restore base image
+      - name: Restore Common image
         if: steps.common-cache.outputs.cache-hit == 'true'
         run: docker image load -i /tmp/docker/${{ matrix.image-name }}.tar
 
-      - name: Build base image
-        run: docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
-
-      - name: Save base image in Cache
+      - name: Build and Cache Common image
         if: steps.common-cache.outputs.cache-hit != 'true'
         run: |
+          docker build -f common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
           mkdir -p /tmp/docker
           docker image save -o /tmp/docker/${{ matrix.image-name }}.tar ${{ matrix.image-name }}:build
 
-      - name: GDAL build cache
+      - name: setup GDAL cache
         uses: actions/cache@v2
         id: gdal-cache
         with:
@@ -55,67 +50,39 @@ jobs:
 
       - name: Restore gdal image
         if: steps.gdal-cache.outputs.cache-hit == 'true'
-        run: docker image load -i /tmp/docker/lambda-${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar
+        run: docker image load -i /tmp/docker/${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar
 
-      - name: Build gdal docker image
+      - name:  Build and Cache GDAL image
+        if: steps.gdal-cache.outputs.cache-hit != 'true'
         run: |
           docker build \
             --build-arg IMAGE_VERSION=${{ matrix.image-name }} \
             -f gdal${{ matrix.gdal-version }}/Dockerfile \
-            -t lambgeo/lambda-${{ matrix.image-name }}:gdal${{ matrix.gdal-version }} .
-
-      - name: Save gdal image in Cache
-        if: steps.gdal-cache.outputs.cache-hit != 'true'
-        run: |
+            -t lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }} .
           mkdir -p /tmp/docker
           docker image save \
-            -o /tmp/docker/lambda-${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar \
-            lambgeo/lambda-${{ matrix.image-name }}:gdal${{ matrix.gdal-version }}
+            -o /tmp/docker/${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar \
+            lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}
 
       - name: Run Tests
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda-${{ matrix.image-name }}:gdal${{ matrix.gdal-version }} \
+            lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }} \
             sh -c "cd /local/tests && sh tests.sh"
 
       - name: Push to DockerHub
-        if: contains(github.ref, 'tags')
-        run: docker push lambgeo/lambda-${{ matrix.image-name }}:gdal${{ matrix.gdal-version }}
+        if: github.ref == 'refs/heads/master'
+        run: docker push lambgeo/lambda${{ steps.amazonlinux.outputs.version }}-gdal:${{ matrix.gdal-version }}
 
-      - name: Create and Publish Layer
-        if: contains(github.ref, 'tags')
+      - name: Build Runtime and Push to DockerHub
+        if: github.ref == 'refs/heads/master'
         run: |
-          docker run \
-            -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda-${{ matrix.image-name }}:gdal${{ matrix.gdal-version }} \
-            sh -c "cd /local/scripts && sh create-lambda-layer.sh"
-
-          python scripts/deploy-layer.py package.zip ${{ matrix.gdal-version }} ${{ matrix.image-version }}
-
-  runtimes:
-      needs: [build]
-      runs-on: ubuntu-latest
-      if: contains(github.ref, 'tags')
-      strategy:
-        matrix:
-          runtimes: [py3.7, py3.8]
-      steps:
-        - uses: actions/checkout@v2
-        - name: Login to DockerHub
-          uses: docker/login-action@v1
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-        - name: Push to DockerHub
-          env:
-              GDAL_VERSIONS: "2.4 3.1"
-          run: |
-            for GDAL_VERSION in ${GDAL_VERSIONS}; do
-              docker build \
-                --build-arg GDAL_VERSION=${GDAL_VERSION} \
-                -f runtimes/${{ matrix.runtimes }} \
-                -t lambgeo/lambda:gdal${GDAL_VERSION}-${{ matrix.runtimes }} .
-              docker push lambgeo/lambda:gdal${GDAL_VERSION}-${{ matrix.runtimes }}
-            done
+          runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
+          for runtime in ${runtimes}; do
+            docker build \
+              --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
+              -f runtimes/${runtime} \
+              -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime} .
+            docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime}
+          done
