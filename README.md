@@ -8,8 +8,8 @@
   <em>AWS lambda (Amazonlinux) like docker images with GDAL.</em>
 </p>
 <p align="center">
-  <a href="https://github.com/cogeotiff/rio-tiler/actions?query=workflow%3ACI" target="_blank">
-      <img src="https://github.com/cogeotiff/rio-tiler/workflows/CI/badge.svg" alt="Test">
+  <a href="https://github.com/lambgeo/docker-lambda/actions?query=workflow%3ACI" target="_blank">
+      <img src="https://github.com/lambgeo/docker-lambda/workflows/CI/badge.svg" alt="Test">
   </a>
 </p>
 
