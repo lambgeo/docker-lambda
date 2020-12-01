@@ -1,9 +1,5 @@
 
-
-import os
 import click
-
-import docker
 
 from boto3.session import Session as boto3_session
 from botocore.client import Config
@@ -56,24 +52,9 @@ CompatibleRuntimes_al2 = [
 @click.option('--deploy', is_flag=True)
 def main(gdalversion, alversion, deploy):
     """Build and Deploy Layers."""
-    client = docker.from_env()
-
     version = "-al2" if alversion == "base-2" else ""
+
     runtimes = CompatibleRuntimes_al2 if alversion == "base-2" else CompatibleRuntimes_al1
-
-    docker_name = f"lambgeo/lambda-gdal:{gdalversion}{version}"
-
-    click.echo(f"Pulling docker image: {docker_name}...")
-    client.images.pull(docker_name)
-
-    click.echo("Create Package")
-    client.containers.run(
-        image="layer:latest",
-        command="/bin/sh /local/scripts/create-layer.sh",
-        remove=True,
-        volumes={os.path.abspath("./"): {"bind": "/local/", "mode": "rw"}},
-        user=0,
-    )
 
     gdalversion_nodot = gdalversion.replace(".", "")
     layer_name = f"gdal{gdalversion_nodot}{version}"
