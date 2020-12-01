@@ -77,7 +77,7 @@ def main(gdalversion, alversion, deploy):
                 res = client.publish_layer_version(
                     LayerName=layer_name,
                     Content={"ZipFile": zf.read()},
-                    CompatibleRuntimes=[runtimes],
+                    CompatibleRuntimes=runtimes,
                     Description=description,
                     LicenseInfo="MIT"
                 )
