@@ -51,35 +51,63 @@ Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g pytho
 1. Dockerfile
 
 ```Dockerfile
-FROM lambgeo/lambda-gdal:3.2-python3.8
+FROM lambgeo/lambda-gdal:3.2-al2 as gdal
+
+# We use lambci docker image for the runtime
+FROM lambci/lambda:build-python3.8
 
 ENV PACKAGE_PREFIX=/var/task
+
+# Bring C libs from lambgeo/lambda-gdal image
+COPY --from=gdal /opt/lib/ ${PACKAGE_PREFIX}/lib/
+COPY --from=gdal /opt/include/ ${PACKAGE_PREFIX}/include/
+COPY --from=gdal /opt/share/ ${PACKAGE_PREFIX}/share/
+COPY --from=gdal /opt/bin/ ${PACKAGE_PREFIX}/bin/
+ENV \
+  GDAL_DATA=${PACKAGE_PREFIX}/share/gdal \
+  PROJ_LIB=${PACKAGE_PREFIX}/share/proj \
+  GDAL_CONFIG=${PACKAGE_PREFIX}/bin/gdal-config \
+  GEOS_CONFIG=${PACKAGE_PREFIX}/bin/geos-config \
+  PATH=${PACKAGE_PREFIX}/bin:$PATH
+
+# Set some useful env
+ENV \
+  LANG=en_US.UTF-8 \
+  LC_ALL=en_US.UTF-8 \
+  CFLAGS="--std=c99"
 
 # Copy any local files to the package
 COPY handler.py ${PACKAGE_PREFIX}/handler.py
 
-# Install some requirements
+# This is needed for rasterio
+RUN pip3 install cython numpy --no-binary numpy
+
+# Install some requirements to `/var/task` (using `-t` otpion)
 RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
 
-# Cleanup the package of useless files
-RUN rm -rdf $PACKAGE_PREFIX/boto3/ \
-  && rm -rdf $PACKAGE_PREFIX/botocore/ \
-  && rm -rdf $PACKAGE_PREFIX/docutils/ \
-  && rm -rdf $PACKAGE_PREFIX/dateutil/ \
-  && rm -rdf $PACKAGE_PREFIX/jmespath/ \
-  && rm -rdf $PACKAGE_PREFIX/s3transfer/ \
-  && rm -rdf $PACKAGE_PREFIX/numpy/doc/ \
-  && rm -rdf $PREFIX/share/doc \
-  && rm -rdf $PREFIX/share/man \
-  && rm -rdf $PREFIX/share/hdf*
+# Reduce size of the C libs
+RUN cd $PACKAGE_PREFIX && find lib -name \*.so\* -exec strip {} \;
+
+# Create package.zip
+RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
+```
+
+Or if you are working with python, you can use lambgeo pre-build docker images:
+
+```Dockerfile
+FROM lambgeo/lambda-gdal:3.2-python3.8
+
+# Copy any local files to the package
+COPY handler.py ${PACKAGE_PREFIX}/handler.py
+
+# Install some requirements to `/var/task` (using `-t` otpion)
+RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
 
 # Reduce size of the C libs
 RUN cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
 
-# Copy python files
+# Create package.zip
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
-
-# Copy shared libs
 RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so* share
 RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack
 ```
@@ -97,6 +125,7 @@ Package content should be like:
 ```
 package.zip
   |
+  |___ bin/      # GDAL binaries
   |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
   |___ share/    # GDAL/PROJ data directories
   |___ rasterio/
@@ -114,6 +143,128 @@ For Rasterio or other libraries to be aware of GDAL/PROJ C libraries, you need t
 ### Other variable
 
 Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote grids: https://proj.org/usage/network.html
+
+---
+
+## AWS Lambda Layers
+
+gdal | amazonlinux version| version | size (Mb)| unzipped size (Mb)| arn
+  ---|                 ---|      ---|       ---|                ---| ---
+3.2  |                   1|        1|      43.8|              138.8| arn:aws:lambda:{REGION}:524387336408:layer:gdal32:1
+3.1  |                   1|        1|      43.7|              128.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal31:1
+2.4  |                   1|        1|      36.3|              121.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal24:1
+  ---|                    |      ---|       ---|                ---| ---
+3.2  |                   2|        1|      44.4|                140| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:1
+3.1  |                   2|        1|      44.3|              139.7| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:1
+2.4  |                   2|        1|      36.7|                130| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:1
+
+**Layer content:**
+
+```
+layer.zip
+  |
+  |___ bin/      # Binaries
+  |___ lib/      # Shared libraries (GDAL, PROJ, GEOS...)
+  |___ share/    # GDAL/PROJ data directories
+```
+
+The layer content will be unzip in `/opt` directory in AWS Lambda. For the python libs to be able to use the C libraries you have to make sure to set 2 important environment variables:
+
+- **GDAL_DATA:** /opt/share/gdal
+- **PROJ_LIB:** /opt/share/proj
+
+### How To
+
+There are 2 ways to use the layers:
+
+#### 1. Simple (No dependencies)
+
+If you don't need to add more runtime dependencies, you can just create a lambda package (zip file) with you lambda handler.
+
+```bash
+zip -r9q package.zip handler.py
+```
+
+**Content:**
+
+```
+package.zip
+  |___ handler.py   # aws lambda python handler
+```
+
+**AWS Lambda Config:**
+- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal32:1` (example)
+- env:
+  - **GDAL_DATA:** /opt/share/gdal
+  - **PROJ_LIB:** /opt/share/proj
+- lambda handler: `handler.handler`
+
+
+#### 2. Advanced (need other python dependencies)
+
+If your lambda handler needs more dependencies you'll have to use the exact same environment. To ease this you can find the docker images for each lambda on docker hub.
+
+- Create a docker file
+
+```dockerfile
+FROM lambgeo/lambda-gdal:3.2-al2
+
+# We use lambci docker image for the runtime
+FROM lambci/lambda:build-python3.8
+
+# Bring C libs from lambgeo/lambda-gdal image
+COPY --from=gdal /opt/lib/ /opt/lib/
+COPY --from=gdal /opt/include/ /opt/include/
+COPY --from=gdal /opt/share/ /opt/share/
+COPY --from=gdal /opt/bin/ /opt/bin/
+ENV \
+  GDAL_DATA=/opt/share/gdal \
+  PROJ_LIB=/opt/share/proj \
+  GDAL_CONFIG=/opt/bin/gdal-config \
+  GEOS_CONFIG=/opt/bin/geos-config \
+  PATH=/opt/bin:$PATH
+
+# Set some useful env
+ENV \
+  LANG=en_US.UTF-8 \
+  LC_ALL=en_US.UTF-8 \
+  CFLAGS="--std=c99"
+
+ENV PYTHONUSERBASE=/var/task
+
+# Install dependencies
+COPY handler.py $PYTHONUSERBASE/handler.py
+
+# Here we use the `--user` option to make sure to not replicate modules.
+RUN pip install rio-tiler --user
+
+# Move some files around
+RUN mv ${PYTHONUSERBASE}/lib/python3.8/site-packages/* ${PYTHONUSERBASE}/
+RUN rm -rf ${PYTHONUSERBASE}/lib
+
+echo "Create archive"
+RUN cd $PYTHONUSERBASE && zip -r9q /tmp/package.zip *
+```
+
+- create package
+```bash
+docker build --tag package:latest .
+docker run --name lambda -w /var/task -itd package:latest bash
+docker cp lambda:/tmp/package.zip package.zip
+docker stop lambda
+docker rm lambda
+```
+
+**Content:**
+
+```
+package.zip
+  |___ handler.py   # aws lambda python handler
+  |___ module1/     # dependencies
+  |___ module2/
+  |___ module3/
+  |___ ...
+```
 
 
 ### Refactor
