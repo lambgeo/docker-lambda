@@ -4,7 +4,9 @@ on:
   push:
     paths:
     - '**Dockerfile'
-    - 'runtimes/**'
+    - 'dockerfiles/runtimes/**'
+    - 'scripts/deploy.py'
+    - 'scripts/create-layer.sh'
 
 jobs:
   build:
