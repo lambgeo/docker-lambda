@@ -4,7 +4,7 @@ FROM ${IMAGE_VERSION}:build as builder
 
 ENV \
   GEOS_VERSION=3.8.1 \
-  PROJ_VERSION=7.1.1 \
+  PROJ_VERSION=7.2.0 \
   LIBTIFF_VERSION=4.1.0
 
 # libtiff
@@ -32,6 +32,13 @@ RUN mkdir /tmp/geos \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/geos
 
+# libdeflate
+RUN mkdir /tmp/libdeflate \
+  && curl -sfL https://github.com/ebiggers/libdeflate/archive/v1.7.tar.gz | tar zxf - -C /tmp/libdeflate --strip-components=1 \
+  && cd /tmp/libdeflate \
+  && make -j $(nproc) --silent PREFIX=$PREFIX && make install \
+  && rm -rf /tmp/libdeflate
+
 ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # gdal
@@ -46,27 +53,27 @@ RUN cd /tmp/gdal \
       --disable-debug \
       --enable-lto \
       --prefix=$PREFIX \
+      --without-libtool \
+      --with-hide-internal-symbols \
+      --with-proj=$PREFIX \
+      --with-libtiff=internal --with-rename-internal-libtiff-symbols \
+      --with-geotiff=internal --with-rename-internal-libgeotiff-symbols \
       --with-crypto \
       --with-curl \
       --with-expat \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
-      --with-libtiff=$PREFIX \
-      --with-hide-internal-symbols=yes \
       --with-geos=$PREFIX/bin/geos-config \
-      --with-geotiff=internal \
-      --with-rename-internal-libgeotiff-symbols \
       --with-jpeg=$PREFIX \
-      --with-rename-internal-libtiff-symbols \
       --with-netcdf=$PREFIX \
       --with-openjpeg \
       --with-pg=yes \
       --with-png \
-      --with-proj=$PREFIX \
       --with-sqlite3=$PREFIX \
       --with-xml2=yes \
       --with-webp=$PREFIX \
       --with-zstd=$PREFIX \
+      --with-libdeflate=$PREFIX \
       --without-cfitsio \
       --without-ecw \
       --without-fme \
@@ -97,34 +104,39 @@ RUN cd /tmp/gdal \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/gdal
 
-# from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
-# Install patchelf (latest with unreleased bug fixes)
-ENV PATCHELF_VERSION 0.10
-RUN mkdir /tmp/patchelf \
-  && curl -sfL https://github.com/NixOS/patchelf/archive/$PATCHELF_VERSION.tar.gz | tar zxf - -C /tmp/patchelf --strip-components=1 \
-  && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
-  && make -j $(nproc) --silent && make install \
-  && cd / && rm -rf /tmp/patchelf
+# # from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
+# # Install patchelf (latest with unreleased bug fixes)
+# ENV PATCHELF_VERSION 0.10
+# RUN mkdir /tmp/patchelf \
+#   && curl -sfL https://github.com/NixOS/patchelf/archive/$PATCHELF_VERSION.tar.gz | tar zxf - -C /tmp/patchelf --strip-components=1 \
+#   && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
+#   && make -j $(nproc) --silent && make install \
+#   && cd / && rm -rf /tmp/patchelf
 
-# Move /lib64 (libjpeg) to /lib
-RUN mv $PREFIX/lib64/lib* $PREFIX/lib/
+# # Move /lib64 (libjpeg) to /lib
+# RUN mv $PREFIX/lib64/lib* $PREFIX/lib/
 
-# FIX
-RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
+# # libturbojpeg.so is not used by GDAL. Only libjpeg.so*
+# RUN rm -f $PREFIX/lib/libturbojpeg.so* \
+#   # Only libwebp.so is used by GDAL
+#   && rm -f  $PREFIX/lib/libwebpmux.so*  $PREFIX/lib/libwebpdemux.so* $PREFIX/lib/libwebpdecoder.so*
 
-# Build final image
-FROM lambci/lambda-${IMAGE_VERSION}:build  as runner
+# # FIX
+# RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
 
-ENV PREFIX /opt
-COPY --from=builder /opt/lib/ $PREFIX/lib/
-COPY --from=builder /opt/include/ $PREFIX/include/
-COPY --from=builder /opt/share/ $PREFIX/share/
-COPY --from=builder /opt/bin/ $PREFIX/bin/
+# # Build final image
+# FROM lambci/lambda-${IMAGE_VERSION}:build  as runner
 
-ENV \
-  GDAL_VERSION=3.2.0 \
-  GDAL_DATA=$PREFIX/share/gdal \
-  PROJ_LIB=$PREFIX/share/proj \
-  GDAL_CONFIG=$PREFIX/bin/gdal-config \
-  GEOS_CONFIG=$PREFIX/bin/geos-config \
-  PATH=$PREFIX/bin:$PATH
+# ENV PREFIX /opt
+# COPY --from=builder /opt/lib/ $PREFIX/lib/
+# COPY --from=builder /opt/include/ $PREFIX/include/
+# COPY --from=builder /opt/share/ $PREFIX/share/
+# COPY --from=builder /opt/bin/ $PREFIX/bin/
+
+# ENV \
+#   GDAL_VERSION=3.2.0 \
+#   GDAL_DATA=$PREFIX/share/gdal \
+#   PROJ_LIB=$PREFIX/share/proj \
+#   GDAL_CONFIG=$PREFIX/bin/gdal-config \
+#   GEOS_CONFIG=$PREFIX/bin/geos-config \
+#   PATH=$PREFIX/bin:$PATH

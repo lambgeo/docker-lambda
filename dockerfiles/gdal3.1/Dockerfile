@@ -46,23 +46,22 @@ RUN cd /tmp/gdal \
       --disable-debug \
       --enable-lto \
       --prefix=$PREFIX \
+      --without-libtool \
+      --with-hide-internal-symbols \
+      --with-proj=$PREFIX \
+      --with-libtiff=internal --with-rename-internal-libtiff-symbols \
+      --with-geotiff=internal --with-rename-internal-libgeotiff-symbols \
       --with-crypto \
       --with-curl \
       --with-expat \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
-      --with-libtiff=$PREFIX \
-      --with-hide-internal-symbols=yes \
       --with-geos=$PREFIX/bin/geos-config \
-      --with-geotiff=internal \
-      --with-rename-internal-libgeotiff-symbols \
       --with-jpeg=$PREFIX \
-      --with-rename-internal-libtiff-symbols \
       --with-netcdf=$PREFIX \
       --with-openjpeg \
       --with-pg=yes \
       --with-png \
-      --with-proj=$PREFIX \
       --with-sqlite3=$PREFIX \
       --with-xml2=yes \
       --with-webp=$PREFIX \
@@ -96,6 +95,8 @@ RUN cd /tmp/gdal \
 RUN cd /tmp/gdal \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/gdal
+
+
 
 # from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
 # Install patchelf (latest with unreleased bug fixes)
