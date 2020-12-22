@@ -3,7 +3,7 @@
 version=$(gdal-config --version)
 echo Running tests for GDAL ${version}
 
-echo "Checking formats:"
+echo "Checking formats"
 if [[ ! "$(gdal-config --prefix | grep $PREFIX)" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(gdal-config --formats | grep 'openjpeg')" ]]; then echo "openjpeg NOK" && exit 1; fi
 if [[ ! "$(gdal-config --formats | grep 'gtiff')" ]]; then echo "gtiff NOK" && exit 1; fi
@@ -18,11 +18,11 @@ if [[ ! "$(ogrinfo --formats | grep 'GML')" ]]; then echo "GLM NOK" && exit 1; f
 if [[ ! "$(ogrinfo --formats | grep 'PostgreSQL')" ]]; then echo "PostGres NOK" && exit 1; fi
 echo "OK"
 
-echo "Checking sqlite build:"
+echo "Checking sqlite build"
 if [[ ! "$(ldd $PREFIX/bin/gdalwarp | grep '/opt/bin/../lib/libsqlite3')" ]]; then echo "libsql NOK" && exit 1; fi
 echo "OK"
 
-echo "Checking OGR:"
+echo "Checking OGR"
 if [[ ! "$(ogrinfo fixtures/map.geojson | grep 'GeoJSON')" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(ogrinfo fixtures/POLYGON.shp | grep 'ESRI Shapefile')" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(ogrinfo fixtures/MSK_CLOUDS_B00.gml | grep 'GML')" ]]; then echo "NOK" && exit 1; fi
@@ -36,7 +36,7 @@ if [ "${version}" != "2.4.2" ]; then
     echo "OK"
 fi
 
-echo "Checking Reading COG:"
+echo "Checking Reading COG"
 if [[ ! "$(gdal_translate fixtures/cog.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(gdal_translate fixtures/cog_webp.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(gdal_translate fixtures/cog_jpeg.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
