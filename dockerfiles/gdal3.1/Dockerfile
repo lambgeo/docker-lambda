@@ -5,24 +5,7 @@ FROM ${IMAGE_VERSION}:build as builder
 ENV \
   GEOS_VERSION=3.8.1 \
   PROJ_VERSION=7.1.1 \
-  LIBTIFF_VERSION=4.1.0
-
-# libtiff
-RUN mkdir /tmp/libtiff \
-  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1 \
-  && cd /tmp/libtiff \
-  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
-  && make -j $(nproc) --silent && make install \
-  && rm -rf /tmp/libtiff
-
-# proj
-RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
-   && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
-   && curl -sfL http://download.osgeo.org/proj/proj-datumgrid-latest.tar.gz | tar zxf - -C /tmp/proj/data \
-   && cd /tmp/proj \
-   && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
-   && make -j $(nproc) --silent && make install \
-   && rm -rf /tmp/proj
+  LIBTIFF_VERSION=4.2.0
 
 # geos
 RUN mkdir /tmp/geos \
@@ -32,7 +15,40 @@ RUN mkdir /tmp/geos \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/geos
 
+# libdeflate
+RUN mkdir /tmp/libdeflate \
+  && curl -sfL https://github.com/ebiggers/libdeflate/archive/v1.7.tar.gz | tar zxf - -C /tmp/libdeflate --strip-components=1 \
+  && cd /tmp/libdeflate \
+  && make -j $(nproc) --silent PREFIX=$PREFIX && make install \
+  && rm -rf /tmp/libdeflate
+
 ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
+
+# libtiff
+RUN mkdir /tmp/libtiff \
+  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1
+
+RUN cd /tmp/libtiff \
+  && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
+  --prefix=$PREFIX \
+  --disable-static \
+  --enable-rpath \
+  --with-libdeflate-lib-dir=$PREFIX/lib \
+  --with-libdeflate-include-dir=$PREFIX/include \
+  --with-jpeg-lib-dir=$PREFIX/lib \
+  --with-jpeg-include-dir=$PREFIX/include \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/libtiff
+
+# proj
+# We still provide proj-datumgrid but the user can choose to set `PROJ_NETWORK=ON`
+# to use network grids
+RUN mkdir /tmp/proj \
+  && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
+  && cd /tmp/proj \
+  && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/proj
 
 # gdal
 # Use latest commits from Github instead of release
@@ -53,7 +69,7 @@ RUN cd /tmp/gdal \
       --with-geotiff=internal --with-rename-internal-libgeotiff-symbols \
       --with-crypto \
       --with-curl \
-      --with-expat \
+      --with-expat=$PREFIX \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
       --with-geos=$PREFIX/bin/geos-config \
@@ -66,6 +82,7 @@ RUN cd /tmp/gdal \
       --with-xml2=yes \
       --with-webp=$PREFIX \
       --with-zstd=$PREFIX \
+      --with-threads=yes \
       --without-cfitsio \
       --without-ecw \
       --without-fme \
@@ -96,8 +113,6 @@ RUN cd /tmp/gdal \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/gdal
 
-
-
 # from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
 # Install patchelf (latest with unreleased bug fixes)
 ENV PATCHELF_VERSION 0.10
@@ -106,9 +121,6 @@ RUN mkdir /tmp/patchelf \
   && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
   && make -j $(nproc) --silent && make install \
   && cd / && rm -rf /tmp/patchelf
-
-# Move /lib64 (libjpeg) to /lib
-RUN mv $PREFIX/lib64/lib* $PREFIX/lib/
 
 # FIX
 RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
