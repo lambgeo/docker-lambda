@@ -24,7 +24,7 @@ ENV \
   WEBP_VERSION=1.1.0 \
   ZSTD_VERSION=1.4.5
 
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/$PREFIX/lib:/$PREFIX/lib64
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$PREFIX/lib:$PREFIX/lib64
 
 # pkg-config
 RUN mkdir /tmp/pkg-config \
@@ -51,12 +51,13 @@ RUN mkdir /tmp/openjpeg \
   && make -j $(nproc) install && make clean \
   && rm -rf /tmp/openjpeg
 
-# jpeg_turbo
+# libjpeg_turbo
 RUN mkdir /tmp/jpeg \
   && curl -sfL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${LIBJPEG_TURBO_VERSION}.tar.gz | tar zxf - -C /tmp/jpeg --strip-components=1 \
   && cd /tmp/jpeg \
-  && cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX . \
+  && cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release . \
   && make -j $(nproc) install && make clean \
+  && mv $PREFIX/lib64/lib* $PREFIX/lib/ \
   && rm -rf /tmp/jpeg
 
 # webp
@@ -74,7 +75,6 @@ RUN mkdir /tmp/zstd \
   && make -j $(nproc) PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 --silent && make install PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 && make clean \
   && rm -rf /tmp/zstd
 
-
 # szip (for hdf)
 RUN mkdir /tmp/szip \
   && curl -sfL https://support.hdfgroup.org/ftp/lib-external/szip/$SZIP_VERSION/src/szip-$SZIP_VERSION.tar.gz | tar zxf - -C /tmp/szip --strip-components=1 \
@@ -90,6 +90,7 @@ RUN mkdir /tmp/hdf4 \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
   --prefix=$PREFIX \
   --with-szlib=$PREFIX \
+  --with-jpeg=$PREFIX \
   --enable-shared \
   --disable-static \
   --disable-netcdf \

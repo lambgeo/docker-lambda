@@ -24,7 +24,7 @@ ENV \
   WEBP_VERSION=1.1.0 \
   ZSTD_VERSION=1.4.5
 
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/$PREFIX/lib:/$PREFIX/lib64
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$PREFIX/lib:$PREFIX/lib64
 
 # pkg-config
 RUN mkdir /tmp/pkg-config \
@@ -42,15 +42,7 @@ RUN mkdir /tmp/png \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/png
 
-# libjpeg
-RUN mkdir /tmp/libjpeg \
-  && curl -sfL http://www.ijg.org/files/jpegsrc.v9d.tar.gz | tar zxf - -C /tmp/libjpeg --strip-components=1 \
-  && cd /tmp/libjpeg \
-  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
-  && make -j $(nproc) --silent && make install && make clean \
-  && rm -rf /tmp/libjpeg
-
-  # openjpeg
+# openjpeg
 RUN mkdir /tmp/openjpeg \
   && curl -sfL https://github.com/uclouvain/openjpeg/archive/v$OPENJPEG_VERSION.tar.gz | tar zxf - -C /tmp/openjpeg --strip-components=1 \
   && cd /tmp/openjpeg \
@@ -59,12 +51,13 @@ RUN mkdir /tmp/openjpeg \
   && make -j $(nproc) install && make clean \
   && rm -rf /tmp/openjpeg
 
-# jpeg_turbo
+# libjpeg_turbo
 RUN mkdir /tmp/jpeg \
   && curl -sfL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${LIBJPEG_TURBO_VERSION}.tar.gz | tar zxf - -C /tmp/jpeg --strip-components=1 \
   && cd /tmp/jpeg \
-  && cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX . \
+  && cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release . \
   && make -j $(nproc) install && make clean \
+  && mv $PREFIX/lib64/lib* $PREFIX/lib/ \
   && rm -rf /tmp/jpeg
 
 # webp
@@ -81,7 +74,6 @@ RUN mkdir /tmp/zstd \
   && cd /tmp/zstd \
   && make -j $(nproc) PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 --silent && make install PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 && make clean \
   && rm -rf /tmp/zstd
-
 
 # szip (for hdf)
 RUN mkdir /tmp/szip \
@@ -149,6 +141,14 @@ RUN mkdir /tmp/sqlite \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/sqlite
+
+# libexpat
+RUN mkdir /tmp/libexpat \
+  && curl -sfL https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.gz | tar zxf - -C /tmp/libexpat --strip-components=1 \
+  && cd /tmp/libexpat \
+  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/libexpat
 
 ENV \
   SQLITE3_LIBS="-L${PREFIX}/lib -lsqlite3" \

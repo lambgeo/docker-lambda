@@ -38,7 +38,7 @@ RUN cd /tmp/gdal \
       --prefix=$PREFIX \
       --with-crypto \
       --with-curl \
-      --with-expat \
+      --with-expat=$PREFIX \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
       --with-hide-internal-symbols=yes \
@@ -57,6 +57,7 @@ RUN cd /tmp/gdal \
       --with-xml2 \
       --with-webp=$PREFIX \
       --with-zstd=$PREFIX \
+      --with-threads=yes \
       --without-bsb \
       --without-cfitsio \
       --without-ecw \
@@ -82,9 +83,6 @@ RUN mkdir /tmp/patchelf \
   && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
   && make -j $(nproc) --silent && make install \
   && cd / && rm -rf /tmp/patchelf
-
-# Move /lib64 (libjpeg) to /lib
-RUN mv $PREFIX/lib64/lib* $PREFIX/lib/
 
 # FIX
 RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
