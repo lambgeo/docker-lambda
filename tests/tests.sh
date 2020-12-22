@@ -28,7 +28,7 @@ if [[ ! "$(ogrinfo fixtures/POLYGON.shp | grep 'ESRI Shapefile')" ]]; then echo 
 if [[ ! "$(ogrinfo fixtures/MSK_CLOUDS_B00.gml | grep 'GML')" ]]; then echo "NOK" && exit 1; fi
 echo "OK"
 
-if [ "${version}" != "2.4.2" ]; then
+if [ "${version}" != "2.4.4" ]; then
     # for GDAL >=3.1
     echo "Checking PROJ_NETWORK:"
     if [[ ! "$(PROJ_NETWORK=ON projinfo --remote-data | grep 'Status: enabled')" ]]; then echo "NOK" && exit 1; fi
