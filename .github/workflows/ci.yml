@@ -7,6 +7,11 @@ on:
     - 'dockerfiles/runtimes/**'
     - 'scripts/deploy.py'
     - 'scripts/create-layer.sh'
+    branches:
+    - master
+    tags:
+    - '*'
+  pull_request:
 
 jobs:
   build:
