@@ -28,10 +28,6 @@ if [[ ! "$(ogrinfo fixtures/POLYGON.shp | grep 'ESRI Shapefile')" ]]; then echo 
 if [[ ! "$(ogrinfo fixtures/MSK_CLOUDS_B00.gml | grep 'GML')" ]]; then echo "NOK" && exit 1; fi
 echo "OK"
 
-echo "Checking PROJ:"
-if [[ ! "$(echo "-94.07 41.69" | cs2cs +proj=latlon +to +proj=utm +zone=10 +datum=NAD27 | grep '2915747.97')" ]]; then echo "NOK" && exit 1; fi
-echo "OK"
-
 if [ "${version}" != "2.4.2" ]; then
     # for GDAL >=3.1
     echo "Checking PROJ_NETWORK:"
