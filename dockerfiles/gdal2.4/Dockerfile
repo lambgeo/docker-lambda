@@ -6,13 +6,16 @@ ENV \
   GEOS_VERSION=3.8.1 \
   PROJ_VERSION=5.2.0
 
+ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
+
 # proj
-RUN mkdir /tmp/proj \
-   && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
-   && cd /tmp/proj \
-   && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
-   && make -j $(nproc) --silent && make install \
-   && rm -rf /tmp/proj
+RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
+  && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
+  && curl -sfL http://download.osgeo.org/proj/proj-datumgrid-latest.tar.gz | tar zxf - -C /tmp/proj/data \
+  && cd /tmp/proj \
+  && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/proj
 
 # geos
 RUN mkdir /tmp/geos \
@@ -21,8 +24,6 @@ RUN mkdir /tmp/geos \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/geos
-
-ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # gdal
 # Use latest commits from Github instead of release
@@ -83,6 +84,11 @@ RUN mkdir /tmp/patchelf \
   && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
   && make -j $(nproc) --silent && make install \
   && cd / && rm -rf /tmp/patchelf
+
+# libturbojpeg.so is not used by GDAL. Only libjpeg.so*
+RUN rm -f $PREFIX/lib/libturbojpeg.so* \
+  # Only libwebp.so is used by GDAL
+  && rm -f  $PREFIX/lib/libwebpmux.so*  $PREFIX/lib/libwebpdemux.so* $PREFIX/lib/libwebpdecoder.so*
 
 # FIX
 RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done

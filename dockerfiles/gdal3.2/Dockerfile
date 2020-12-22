@@ -27,9 +27,8 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # libtiff
 RUN mkdir /tmp/libtiff \
-  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1
-
-RUN cd /tmp/libtiff \
+  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1 \
+  && cd /tmp/libtiff \
   && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
     --prefix=$PREFIX \
     --disable-static \

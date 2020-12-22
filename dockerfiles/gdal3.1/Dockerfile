@@ -5,7 +5,8 @@ FROM ${IMAGE_VERSION}:build as builder
 ENV \
   GEOS_VERSION=3.8.1 \
   PROJ_VERSION=7.1.1 \
-  LIBTIFF_VERSION=4.2.0
+  LIBTIFF_VERSION=4.2.0 \
+  LIBGEOTIFF_VERSION=1.6.0
 
 # geos
 RUN mkdir /tmp/geos \
@@ -26,9 +27,8 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # libtiff
 RUN mkdir /tmp/libtiff \
-  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1
-
-RUN cd /tmp/libtiff \
+  && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1 \
+  && cd /tmp/libtiff \
   && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
   --prefix=$PREFIX \
   --disable-static \
@@ -43,12 +43,27 @@ RUN cd /tmp/libtiff \
 # proj
 # We still provide proj-datumgrid but the user can choose to set `PROJ_NETWORK=ON`
 # to use network grids
-RUN mkdir /tmp/proj \
+RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
   && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
+  && curl -sfL http://download.osgeo.org/proj/proj-datumgrid-latest.tar.gz | tar zxf - -C /tmp/proj/data \
   && cd /tmp/proj \
   && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/proj
+
+ENV LIBGEOTIFF_VERSION=1.6.0
+RUN mkdir /tmp/libgeotiff \
+  && curl -sfL https://github.com/OSGeo/libgeotiff/releases/download/${LIBGEOTIFF_VERSION}/libgeotiff-${LIBGEOTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libgeotiff --strip-components=1 \
+  && cd /tmp/libgeotiff \
+  && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
+  --prefix=$PREFIX \
+  --with-proj=$PREFIX \
+  --with-jpeg=$PREFIX \
+  --with-zip=yes \
+  --with-zlib \
+  --with-libtiff=$PREFIX \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/libgeotiff
 
 # gdal
 # Use latest commits from Github instead of release
@@ -65,8 +80,8 @@ RUN cd /tmp/gdal \
       --without-libtool \
       --with-hide-internal-symbols \
       --with-proj=$PREFIX \
-      --with-libtiff=internal --with-rename-internal-libtiff-symbols \
-      --with-geotiff=internal --with-rename-internal-libgeotiff-symbols \
+      --with-libtiff=$PREFIX --with-rename-internal-libtiff-symbols \
+      --with-geotiff=$PREFIX --with-rename-internal-libgeotiff-symbols \
       --with-crypto \
       --with-curl \
       --with-expat=$PREFIX \
@@ -121,6 +136,11 @@ RUN mkdir /tmp/patchelf \
   && cd /tmp/patchelf && ./bootstrap.sh && ./configure \
   && make -j $(nproc) --silent && make install \
   && cd / && rm -rf /tmp/patchelf
+
+# libturbojpeg.so is not used by GDAL. Only libjpeg.so*
+RUN rm -f $PREFIX/lib/libturbojpeg.so* \
+  # Only libwebp.so is used by GDAL
+  && rm -f  $PREFIX/lib/libwebpmux.so*  $PREFIX/lib/libwebpdemux.so* $PREFIX/lib/libwebpdecoder.so*
 
 # FIX
 RUN for i in $PREFIX/bin/*; do  patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
