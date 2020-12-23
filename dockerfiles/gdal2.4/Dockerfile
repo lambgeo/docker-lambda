@@ -38,7 +38,7 @@ RUN cd /tmp/gdal \
       --enable-lto \
       --prefix=$PREFIX \
       --with-crypto \
-      --with-curl \
+      --with-curl=$PREFIX \
       --with-expat=$PREFIX \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
@@ -55,7 +55,7 @@ RUN cd /tmp/gdal \
       --with-png \
       --with-proj=$PREFIX \
       --with-sqlite3 \
-      --with-xml2 \
+      --with-xml2=yes \
       --with-webp=$PREFIX \
       --with-zstd=$PREFIX \
       --with-threads=yes \

@@ -18,7 +18,7 @@ docker build \
     -f dockerfiles/gdal${GDAL_VERSION}/Dockerfile \
     -t lambgeo/lambda-gdal:${GDAL_VERSION}${AZN_EXT} .
 
-# docker build \
-#     --build-arg GDAL_VERSION=${GDAL_VERSION} \
-#     -f dockerfiles/runtimes/${RUNTIME} \
-#     -t lambgeo/lambda-gdal:${GDAL_VERSION}-${RUNTIME} .
+docker build \
+    --build-arg GDAL_VERSION=${GDAL_VERSION} \
+    -f dockerfiles/runtimes/${RUNTIME} \
+    -t lambgeo/lambda-gdal:${GDAL_VERSION}-${RUNTIME} .

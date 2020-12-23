@@ -14,6 +14,6 @@ cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
 echo "Create archives"
 cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so*
 cd $PREFIX && zip -r9q --symlinks /tmp/package.zip share
-cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack
+cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack bin/postgres bin/pg_* bin/proj*
 
 cp /tmp/package.zip /local/package.zip

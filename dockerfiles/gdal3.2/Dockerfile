@@ -83,7 +83,7 @@ RUN cd /tmp/gdal \
       --with-libtiff=$PREFIX --with-rename-internal-libtiff-symbols \
       --with-geotiff=$PREFIX --with-rename-internal-libgeotiff-symbols \
       --with-crypto \
-      --with-curl \
+      --with-curl=$PREFIX \
       --with-expat=$PREFIX \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
