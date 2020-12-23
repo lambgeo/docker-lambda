@@ -150,13 +150,13 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote gr
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
-3.2  |                   1|      43.8|              138.8| arn:aws:lambda:{REGION}:524387336408:layer:gdal32:{VERSION}
-3.1  |                   1|      43.7|              128.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal31:{VERSION}
-2.4  |                   1|      36.3|              121.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal24:{VERSION}
+3.2  |                   1|      27.9|               64.8| arn:aws:lambda:{REGION}:524387336408:layer:gdal32:{VERSION}
+3.1  |                   1|      27.3|               68.7| arn:aws:lambda:{REGION}:524387336408:layer:gdal31:{VERSION}
+2.4  |                   1|        21|               71.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal24:{VERSION}
   ---|                    |       ---|                ---| ---
-3.2  |                   2|      44.4|                140| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
-3.1  |                   2|      44.3|              139.7| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
-2.4  |                   2|      36.7|                130| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
+3.2  |                   2|      26.4|               56.1| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
+3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
+2.4  |                   2|      19.5|               63.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
 
 see [/layer.json](/layer.json) for the list of arns
 
