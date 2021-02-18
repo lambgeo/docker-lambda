@@ -17,7 +17,7 @@
 # Docker Images
 
 Based on lambci/lambda-base:build (amazonlinux)
-  - GDAL 3.2.0 (Oct. 2020)
+  - GDAL 3.2.1 (Fev. 2021)
     - **lambgeo/lambda-gdal:3.2**
 
   - GDAL 3.1.4 (Oct. 2020)
@@ -32,7 +32,7 @@ Based on lambci/lambda-base:build (amazonlinux)
     - **lambgeo/lambda-gdal:2.4-python3.7**
 
 Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g python 3.8)
-  - GDAL 3.2.0 (Oct. 2020)
+  - GDAL 3.2.1 (Fev. 2021)
     - **lambgeo/lambda-gdal:3.2-al2**
 
   - GDAL 3.1.4 (Oct. 2020)

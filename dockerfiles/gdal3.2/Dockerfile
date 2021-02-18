@@ -3,8 +3,8 @@ ARG IMAGE_VERSION
 FROM ${IMAGE_VERSION}:build as builder
 
 ENV \
-  GEOS_VERSION=3.8.1 \
-  PROJ_VERSION=7.2.0 \
+  GEOS_VERSION=3.9.0 \
+  PROJ_VERSION=7.2.1 \
   LIBTIFF_VERSION=4.2.0 \
   LIBGEOTIFF_VERSION=1.6.0
 
@@ -51,7 +51,6 @@ RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/proj
 
-ENV LIBGEOTIFF_VERSION=1.6.0
 RUN mkdir /tmp/libgeotiff \
   && curl -sfL https://github.com/OSGeo/libgeotiff/releases/download/${LIBGEOTIFF_VERSION}/libgeotiff-${LIBGEOTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libgeotiff --strip-components=1 \
   && cd /tmp/libgeotiff \
@@ -67,7 +66,7 @@ RUN mkdir /tmp/libgeotiff \
 
 # gdal
 # Use latest commits from Github instead of release
-# "release/3.2" is the up to date 3.2.0 github branch
+# "release/3.2" is the up to date 3.2.1 github branch
 RUN mkdir /tmp/gdal \
   && curl -sfL https://github.com/OSGeo/gdal/archive/release/3.2.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
 
@@ -156,7 +155,7 @@ COPY --from=builder /opt/share/ $PREFIX/share/
 COPY --from=builder /opt/bin/ $PREFIX/bin/
 
 ENV \
-  GDAL_VERSION=3.2.0 \
+  GDAL_VERSION=3.2.1 \
   GDAL_DATA=$PREFIX/share/gdal \
   PROJ_LIB=$PREFIX/share/proj \
   GDAL_CONFIG=$PREFIX/bin/gdal-config \

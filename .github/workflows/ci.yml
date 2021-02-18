@@ -21,7 +21,8 @@ jobs:
     strategy:
       matrix:
         image-name: ['base', 'base-2']
-        gdal-version: [2.4, 3.1, 3.2]
+        # gdal-version: [2.4, 3.1, 3.2]
+        gdal-version: [3.2]
     steps:
       - uses: actions/checkout@v2
 
