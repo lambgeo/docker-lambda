@@ -38,6 +38,7 @@ CompatibleRuntimes_al1 = [
 CompatibleRuntimes_al2 = [
     "nodejs10.x",
     "nodejs12.x",
+    "nodejs14.x",
     "java11",
     "java8.al2",
     "python3.8",
