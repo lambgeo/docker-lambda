@@ -63,14 +63,14 @@ RUN mkdir /tmp/libgeotiff \
   && rm -rf /tmp/libgeotiff
 
 # gdal
+ENV GDAL_VERSION=v3.3.0
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/release/3.2.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
+  && curl -sfL https://github.com/OSGeo/gdal/archive/release/v3.3.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
 
 RUN cd /tmp/gdal \
   && touch config.rpath \
   && LIBXML2_CFLAGS=$(xml2-config --cflags) LIBXML2_LIBS=$(xml2-config --libs) LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
       --disable-debug \
-      --enable-lto \
       --prefix=$PREFIX \
       --without-libtool \
       --with-hide-internal-symbols \
@@ -78,7 +78,7 @@ RUN cd /tmp/gdal \
       --with-libtiff=$PREFIX --with-rename-internal-libtiff-symbols \
       --with-geotiff=$PREFIX --with-rename-internal-libgeotiff-symbols \
       --with-crypto \
-      --with-curl=$PREFIX \
+      --with-curl \
       --with-expat=$PREFIX \
       --with-hdf4=$PREFIX \
       --with-hdf5=$PREFIX \
@@ -101,7 +101,6 @@ RUN cd /tmp/gdal \
       --without-jpeg12 \
       --without-gif \
       --without-gnm \
-      --without-lerc \
       --without-libtool \
       --without-pcraster \
       --without-pcidsk \
@@ -119,6 +118,7 @@ RUN cd /tmp/gdal \
       --enable-driver-gpkg \
       --enable-driver-gml \
       --enable-driver-pgdump
+      # --enable-lto \
 
 RUN cd /tmp/gdal \
   && make -j $(nproc) --quiet && make install --quiet \
@@ -151,9 +151,10 @@ COPY --from=builder /opt/share/ $PREFIX/share/
 COPY --from=builder /opt/bin/ $PREFIX/bin/
 
 ENV \
-  GDAL_VERSION=3.2.1 \
   GDAL_DATA=$PREFIX/share/gdal \
   PROJ_LIB=$PREFIX/share/proj \
   GDAL_CONFIG=$PREFIX/bin/gdal-config \
   GEOS_CONFIG=$PREFIX/bin/geos-config \
   PATH=$PREFIX/bin:$PATH
+
+RUN export GDAL_VERSION=$(gdal-config --version)
