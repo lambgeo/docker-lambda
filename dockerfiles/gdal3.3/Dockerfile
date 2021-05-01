@@ -30,6 +30,8 @@ RUN mkdir /tmp/libtiff \
     --prefix=$PREFIX \
     --disable-static \
     --enable-rpath \
+    --with-lerc-lib-dir=$PREFIX/lib \
+    --with-lerc-include-dir=$PREFIX/include \
     --with-libdeflate-lib-dir=$PREFIX/lib \
     --with-libdeflate-include-dir=$PREFIX/include \
     --with-jpeg-lib-dir=$PREFIX/lib \

@@ -5,7 +5,7 @@ LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 ################################################################################
 # COMMON
 RUN yum makecache fast
-RUN yum install -y automake16 libpng-devel nasm libxml2-devel readline-devel openssl-devel curl-devel
+RUN yum install -y automake16 libpng-devel nasm libxml2-devel readline-devel openssl-devel curl-devel cmake3
 
 ENV PREFIX /opt
 WORKDIR /opt
@@ -23,7 +23,8 @@ ENV \
   SZIP_VERSION=2.1.1 \
   WEBP_VERSION=1.1.0 \
   ZSTD_VERSION=1.4.5 \
-  LIBXML2_VERSION=2.9.10
+  LIBXML2_VERSION=2.9.10 \
+  LERC_VERSION=2.2.1
 
 ENV LD_LIBRARY_PATH $PREFIX/lib:$PREFIX/lib64:$LD_LIBRARY_PATH
 
@@ -75,6 +76,14 @@ RUN mkdir /tmp/zstd \
   && cd /tmp/zstd \
   && make -j $(nproc) PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 --silent && make install PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 && make clean \
   && rm -rf /tmp/zstd
+
+RUN mkdir /tmp/lerc \
+  && curl -sfL https://github.com/Esri/lerc/archive/v${LERC_VERSION}.tar.gz | tar zxf - -C /tmp/lerc --strip-components=1 \
+  && cd /tmp/lerc \
+  && cmake3 -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release . \
+  && make -j $(nproc) install && make clean \
+  && mv $PREFIX/lib64/lib* $PREFIX/lib/ \
+  && rm -rf /tmp/lerc
 
 # szip (for hdf)
 RUN mkdir /tmp/szip \
