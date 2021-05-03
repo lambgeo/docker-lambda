@@ -65,9 +65,8 @@ RUN mkdir /tmp/libgeotiff \
   && rm -rf /tmp/libgeotiff
 
 # gdal
-ENV GDAL_VERSION=v3.3.0
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/release/v3.3.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
+  && curl -sfL https://github.com/OSGeo/gdal/archive/release/3.3.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
 
 RUN cd /tmp/gdal \
   && touch config.rpath \
