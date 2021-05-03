@@ -38,6 +38,7 @@ CompatibleRuntimes_al1 = [
 CompatibleRuntimes_al2 = [
     "nodejs10.x",
     "nodejs12.x",
+    "nodejs14.x",
     "java11",
     "java8.al2",
     "python3.8",
@@ -49,17 +50,12 @@ CompatibleRuntimes_al2 = [
 
 @click.command()
 @click.argument('gdalversion', type=str)
-@click.argument('alversion', type=str)
 @click.option('--deploy', is_flag=True)
-def main(gdalversion, alversion, deploy):
+def main(gdalversion, deploy):
     """Build and Deploy Layers."""
-    version = "-al2" if alversion == "base-2" else ""
-
-    runtimes = CompatibleRuntimes_al2 if alversion == "base-2" else CompatibleRuntimes_al1
-
     gdalversion_nodot = gdalversion.replace(".", "")
-    layer_name = f"gdal{gdalversion_nodot}{version}"
-    description = f"Lambda Layer with GDAL{gdalversion} for amazonlinux {alversion}"
+    layer_name = f"gdal{gdalversion_nodot}-al2"
+    description = f"Lambda Layer with GDAL{gdalversion} for amazonlinux2"
 
     if deploy:
         session = boto3_session()
@@ -77,7 +73,7 @@ def main(gdalversion, alversion, deploy):
                 res = client.publish_layer_version(
                     LayerName=layer_name,
                     Content={"ZipFile": zf.read()},
-                    CompatibleRuntimes=runtimes,
+                    CompatibleRuntimes=CompatibleRuntimes_al2,
                     Description=description,
                     LicenseInfo="MIT"
                 )

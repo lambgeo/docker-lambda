@@ -1,11 +1,11 @@
-FROM lambci/lambda-base:build as builder
+FROM lambci/lambda-base-2:build as builder
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
 ################################################################################
 # COMMON
 RUN yum makecache fast
-RUN yum install -y automake16 libpng-devel nasm
+RUN yum install -y automake16 libpng-devel nasm libxml2-devel readline-devel openssl-devel curl-devel cmake3
 
 ENV PREFIX /opt
 WORKDIR /opt
@@ -22,15 +22,17 @@ ENV \
   PKGCONFIG_VERSION=0.29.2 \
   SZIP_VERSION=2.1.1 \
   WEBP_VERSION=1.1.0 \
-  ZSTD_VERSION=1.4.5
+  ZSTD_VERSION=1.4.5 \
+  LIBXML2_VERSION=2.9.10 \
+  LERC_VERSION=2.2.1
 
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$PREFIX/lib:$PREFIX/lib64
+ENV LD_LIBRARY_PATH $PREFIX/lib:$PREFIX/lib64:$LD_LIBRARY_PATH
 
 # pkg-config
 RUN mkdir /tmp/pkg-config \
   && curl -sfL https://pkg-config.freedesktop.org/releases/pkg-config-$PKGCONFIG_VERSION.tar.gz | tar zxf - -C /tmp/pkg-config --strip-components=1 \
   && cd /tmp/pkg-config \
-  && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+  && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --with-internal-glib \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/pkg-config
 
@@ -74,6 +76,14 @@ RUN mkdir /tmp/zstd \
   && cd /tmp/zstd \
   && make -j $(nproc) PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 --silent && make install PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 && make clean \
   && rm -rf /tmp/zstd
+
+RUN mkdir /tmp/lerc \
+  && curl -sfL https://github.com/Esri/lerc/archive/v${LERC_VERSION}.tar.gz | tar zxf - -C /tmp/lerc --strip-components=1 \
+  && cd /tmp/lerc \
+  && cmake3 -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release . \
+  && make -j $(nproc) install && make clean \
+  && mv $PREFIX/lib64/lib* $PREFIX/lib/ \
+  && rm -rf /tmp/lerc
 
 # szip (for hdf)
 RUN mkdir /tmp/szip \
@@ -150,6 +160,14 @@ RUN mkdir /tmp/libexpat \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/libexpat
 
+# libxml2
+RUN mkdir /tmp/libxml2 \
+  && curl -sfL https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.10/libxml2-v2.9.10.tar.gz | tar zxf - -C /tmp/libxml2 --strip-components=1  \
+  && cd /tmp/libxml2 \
+  && ./autogen.sh --prefix=$PREFIX --with-ftp=no --with-http=no --with-python=no \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/libxml2
+
 # nghttp2
 ENV NGHTTP2_VERSION=1.42.0
 RUN mkdir /tmp/nghttp2 \
@@ -167,15 +185,6 @@ RUN mkdir /tmp/libcurl \
   && ./configure --disable-manual --disable-cookies --with-nghttp2=$PREFIX --prefix=$PREFIX \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/libcurl
-
-# libxml2
-ENV LIBXML2_VERSION=2.9.10
-RUN mkdir /tmp/libxml2 \
-  && curl -sfL https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.10/libxml2-v2.9.10.tar.gz | tar zxf - -C /tmp/libxml2 --strip-components=1  \
-  && cd /tmp/libxml2 \
-  && ./autogen.sh --prefix=$PREFIX --with-ftp=no --with-http=no --with-python=no \
-  && make -j $(nproc) --silent && make install && make clean \
-  && rm -rf /tmp/libxml2
 
 ENV \
   SQLITE3_LIBS="-L${PREFIX}/lib -lsqlite3" \

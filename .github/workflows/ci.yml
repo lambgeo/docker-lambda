@@ -20,9 +20,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        image-name: ['base', 'base-2']
-        # gdal-version: [2.4, 3.1, 3.2]
-        gdal-version: [3.2]
+        gdal-version: [3.2, 3.3]
     steps:
       - uses: actions/checkout@v2
 
@@ -49,57 +47,51 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: set amazonlinux version
-        id: amazonlinux
-        run: echo "::set-output name=version::$(if [ '${{ matrix.image-name }}' == 'base-2' ]; then echo '-al2'; else echo ''; fi)"
-        shell: bash
-
       - name: setup Common cache
         uses: actions/cache@v2
         id: common-cache
         with:
           path: /tmp/docker
-          key: ${{ matrix.image-name }}-${{ hashFiles(format('dockerfiles/common/{0}/Dockerfile', matrix.image-name)) }}
+          key: ${{ hashFiles('dockerfiles/common/Dockerfile') }}
 
       - name: Restore Common image
         if: steps.common-cache.outputs.cache-hit == 'true'
-        run: docker image load -i /tmp/docker/${{ matrix.image-name }}.tar
+        run: docker image load -i /tmp/docker/common.tar
 
       - name: Build and Cache Common image
         if: steps.common-cache.outputs.cache-hit != 'true'
         run: |
-          docker build -f dockerfiles/common/${{ matrix.image-name }}/Dockerfile -t ${{ matrix.image-name }}:build .
+          docker build -f dockerfiles/common/Dockerfile -t lambda-gdal:common .
           mkdir -p /tmp/docker
-          docker image save -o /tmp/docker/${{ matrix.image-name }}.tar ${{ matrix.image-name }}:build
+          docker image save -o /tmp/docker/common.tar lambda-gdal:common
 
       - name: setup GDAL cache
         uses: actions/cache@v2
         id: gdal-cache
         with:
           path: /tmp/docker
-          key: gdal${{ matrix.gdal-version }}-${{ hashFiles(format('dockerfiles/gdal{0}/Dockerfile', matrix.gdal-version)) }}-${{ hashFiles(format('dockerfiles/common/{0}/Dockerfile', matrix.image-name)) }}
+          key: gdal${{ matrix.gdal-version }}-${{ hashFiles(format('dockerfiles/gdal{0}/Dockerfile', matrix.gdal-version)) }}-${{ hashFiles('dockerfiles/common/Dockerfile') }}
 
       - name: Restore gdal image
         if: steps.gdal-cache.outputs.cache-hit == 'true'
-        run: docker image load -i /tmp/docker/${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar
+        run: docker image load -i /tmp/docker/gdal${{ matrix.gdal-version }}.tar
 
       - name:  Build and Cache GDAL image
         if: steps.gdal-cache.outputs.cache-hit != 'true'
         run: |
           docker build \
-            --build-arg IMAGE_VERSION=${{ matrix.image-name }} \
             -f dockerfiles/gdal${{ matrix.gdal-version }}/Dockerfile \
-            -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }} .
+            -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2 .
           mkdir -p /tmp/docker
           docker image save \
-            -o /tmp/docker/${{ matrix.image-name }}-gdal${{ matrix.gdal-version }}.tar \
-            lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }}
+            -o /tmp/docker/gdal${{ matrix.gdal-version }}.tar \
+            lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2
 
       - name: Run Tests
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }} \
+            lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2 \
             sh -c "cd /local/tests && sh tests.sh"
 
       - name: Build and Deploy layers
@@ -107,19 +99,19 @@ jobs:
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }} \
+            lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2 \
             sh -c "sh /local/scripts/create-layer.sh"
 
-          python scripts/deploy.py ${{ matrix.gdal-version }} ${{ matrix.image-name }} --deploy
+          python scripts/deploy.py ${{ matrix.gdal-version }} --deploy
 
       - name: Push to DockerHub
         if: github.ref == 'refs/heads/master'
-        run: docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}${{ steps.amazonlinux.outputs.version }}
+        run: docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2
 
       - name: Build Runtime and Push to DockerHub
         if: github.ref == 'refs/heads/master'
         run: |
-          runtimes=$(if [ '${{ steps.amazonlinux.outputs.version }}' == '-al2' ]; then echo 'python3.8'; else echo 'python3.7'; fi)
+          runtimes='python3.8'
           for runtime in ${runtimes}; do
             docker build \
               --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \

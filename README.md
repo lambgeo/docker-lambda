@@ -16,33 +16,28 @@
 
 # Docker Images
 
-Based on lambci/lambda-base:build (amazonlinux)
-  - GDAL 3.2.1 (Fev. 2021)
+Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g python 3.8)
+  - GDAL 3.3.0 (Apr. 2021)
+    - **lambgeo/lambda-gdal:3.3-al2**
+
+  - GDAL 3.2.3 (Apr. 2021)
+    - **lambgeo/lambda-gdal:3.2-al2**
+
+  - For python 3.8
+    - **lambgeo/lambda-gdal:3.3-python3.8**
+    - **lambgeo/lambda-gdal:3.2-python3.8**
+
+### Archives
+  - amazonlinux
     - **lambgeo/lambda-gdal:3.2**
-
-  - GDAL 3.1.4 (Oct. 2020)
     - **lambgeo/lambda-gdal:3.1**
-
-  - GDAL 2.4.4 (June 2020)
     - **lambgeo/lambda-gdal:2.4**
-
-  - For python 3.7
-    - **lambgeo/lambda-gdal:3.2-python3.7**
     - **lambgeo/lambda-gdal:3.1-python3.7**
     - **lambgeo/lambda-gdal:2.4-python3.7**
 
-Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g python 3.8)
-  - GDAL 3.2.1 (Fev. 2021)
-    - **lambgeo/lambda-gdal:3.2-al2**
-
-  - GDAL 3.1.4 (Oct. 2020)
+  - amazonlinux2
     - **lambgeo/lambda-gdal:3.1-al2**
-
-  - GDAL 2.4.4 (June 2020)
     - **lambgeo/lambda-gdal:2.4-al2**
-
-  - For python 3.8
-    - **lambgeo/lambda-gdal:3.2-python3.8**
     - **lambgeo/lambda-gdal:3.1-python3.8**
     - **lambgeo/lambda-gdal:2.4-python3.8**
 
@@ -150,11 +145,13 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote gr
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
-3.2  |                   1|      27.9|               64.8| arn:aws:lambda:{REGION}:524387336408:layer:gdal32:{VERSION}
-3.1  |                   1|      27.3|               68.7| arn:aws:lambda:{REGION}:524387336408:layer:gdal31:{VERSION}
-2.4  |                   1|        21|               71.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal24:{VERSION}
-  ---|                    |       ---|                ---| ---
+3.3  |                   2|      26.4|               56.1| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
 3.2  |                   2|      26.4|               56.1| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
+
+### archived
+
+gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
+  ---|                 ---|       ---|                ---| ---
 3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
 2.4  |                   2|      19.5|               63.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
 
