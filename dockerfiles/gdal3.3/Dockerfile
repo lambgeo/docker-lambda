@@ -106,6 +106,7 @@ RUN cd /tmp/gdal \
       --without-pcraster \
       --without-pcidsk \
       --disable-all-optional-drivers \
+      --enable-driver-dxf \
       --enable-driver-pds \
       --enable-driver-shape \
       --enable-driver-gpkg \

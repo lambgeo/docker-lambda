@@ -16,6 +16,7 @@ if [[ ! "$(gdal-config --formats | grep 'hdf5')" ]]; then echo "hdf5 NOK" && exi
 if [[ ! "$(gdal-config --formats | grep 'hdf4')" ]]; then echo "hdf4 NOK" && exit 1; fi
 if [[ ! "$(ogrinfo --formats | grep 'GML')" ]]; then echo "GLM NOK" && exit 1; fi
 if [[ ! "$(ogrinfo --formats | grep 'PostgreSQL')" ]]; then echo "PostGres NOK" && exit 1; fi
+if [[ ! "$(ogrinfo --formats | grep 'DXF')" ]]; then echo "DXF NOK" && exit 1; fi
 echo "OK"
 
 echo "Checking sqlite build"
@@ -26,6 +27,7 @@ echo "Checking OGR"
 if [[ ! "$(ogrinfo fixtures/map.geojson | grep 'GeoJSON')" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(ogrinfo fixtures/POLYGON.shp | grep 'ESRI Shapefile')" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(ogrinfo fixtures/MSK_CLOUDS_B00.gml | grep 'GML')" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(ogrinfo fixtures/square.dxf | grep 'DXF')" ]]; then echo "NOK" && exit 1; fi
 echo "OK"
 
 if [ "${version}" != "2.4.4" ]; then
