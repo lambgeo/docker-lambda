@@ -3,8 +3,7 @@ name: CI
 on:
   push:
     paths:
-    - '**Dockerfile'
-    - 'dockerfiles/runtimes/**'
+    - 'dockerfiles/**'
     - 'scripts/deploy.py'
     - 'scripts/create-layer.sh'
     - 'tests/*'

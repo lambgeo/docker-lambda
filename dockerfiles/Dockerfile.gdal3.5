@@ -4,8 +4,9 @@ LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
 RUN yum makecache fast
 RUN yum install -y git autoconf libtool flex bison cmake make tar gzip gcc gcc-c++ automake16 libpng-devel nasm libxml2-devel readline-devel openssl-devel curl-devel cmake3
-RUN
+
 ENV PREFIX /opt
+
 WORKDIR /opt
 
 ENV LD_LIBRARY_PATH $PREFIX/lib:$LD_LIBRARY_PATH
