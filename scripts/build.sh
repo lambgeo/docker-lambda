@@ -2,21 +2,16 @@
 
 GDAL_VERSION=$1
 RUNTIME=$2
+RUNTIME_VERSION=$3
 
-echo "Building image for Amazonlinux2 | GDAL: ${GDAL_VERSION} | Runtime: ${RUNTIME}"
-
-# Base Image
-docker buildx build \
-    -f dockerfiles/common/Dockerfile \
-    -t lambda-gdal:common \
-    .
+echo "Building image for AWS Lambda | GDAL: ${GDAL_VERSION} | Runtime: ${RUNTIME}:${RUNTIME_VERSION}"
 
 docker buildx build \
-    -f dockerfiles/gdal${GDAL_VERSION}/Dockerfile \
-    -t lambgeo/lambda-gdal:${GDAL_VERSION}-al2 \
-    .
+    -f dockerfiles/Dockerfile.gdal${GDAL_VERSION} \
+    -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION} .
 
 docker buildx build \
     --build-arg GDAL_VERSION=${GDAL_VERSION} \
+    --build-arg RUNTIME_VERSION=${RUNTIME_VERSION} \
     -f dockerfiles/runtimes/${RUNTIME} \
-    -t lambgeo/lambda-gdal:${GDAL_VERSION}-${RUNTIME} .
+    -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION}-${RUNTIME}${RUNTIME_VERSION} .

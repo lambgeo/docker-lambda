@@ -16,40 +16,27 @@
 
 # Docker Images
 
-Based on lambci/lambda-base-2:build (amazonlinux2) for newer runtimes (e.g python 3.8)
-  - GDAL 3.3.0 (June 2021)
-    - **lambgeo/lambda-gdal:3.3-al2**
+Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
+  - GDAL 3.5.0
+    - **ghcr.io/lambgeo/lambda-gdal:3.5** (May 2022)
 
-  - GDAL 3.2.3 (June 2021)
-    - **lambgeo/lambda-gdal:3.2-al2**
 
-  - For python 3.8
-    - **lambgeo/lambda-gdal:3.3-python3.8**
-    - **lambgeo/lambda-gdal:3.2-python3.8**
+Runtimes images:
+  - Python (based on `public.ecr.aws/lambda/python:{version}`)
+    - **ghcr.io/lambgeo/lambda-gdal:3.5-python3.9**
+    - **ghcr.io/lambgeo/lambda-gdal:3.5-python3.8**
 
-### Archives
-  - amazonlinux
-    - **lambgeo/lambda-gdal:3.2**
-    - **lambgeo/lambda-gdal:3.1**
-    - **lambgeo/lambda-gdal:2.4**
-    - **lambgeo/lambda-gdal:3.1-python3.7**
-    - **lambgeo/lambda-gdal:2.4-python3.7**
+# Creating Lambda packages
 
-  - amazonlinux2
-    - **lambgeo/lambda-gdal:3.1-al2**
-    - **lambgeo/lambda-gdal:2.4-al2**
-    - **lambgeo/lambda-gdal:3.1-python3.8**
-    - **lambgeo/lambda-gdal:2.4-python3.8**
+## Using
 
-## Creating Lambda packages
-
-1. Dockerfile
+### 1. Create Dockerfile
 
 ```Dockerfile
-FROM lambgeo/lambda-gdal:3.2-al2 as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:3.5 as gdal
 
-# We use lambci docker image for the runtime
-FROM lambci/lambda:build-python3.8
+# We use the official AWS Lambda image
+FROM public.ecr.aws/lambda/{RUNTIME: python|node|go...}:{RUNTIME version}
 
 ENV PACKAGE_PREFIX=/var/task
 
@@ -58,6 +45,7 @@ COPY --from=gdal /opt/lib/ ${PACKAGE_PREFIX}/lib/
 COPY --from=gdal /opt/include/ ${PACKAGE_PREFIX}/include/
 COPY --from=gdal /opt/share/ ${PACKAGE_PREFIX}/share/
 COPY --from=gdal /opt/bin/ ${PACKAGE_PREFIX}/bin/
+
 ENV \
   GDAL_DATA=${PACKAGE_PREFIX}/share/gdal \
   PROJ_LIB=${PACKAGE_PREFIX}/share/proj \
@@ -65,32 +53,18 @@ ENV \
   GEOS_CONFIG=${PACKAGE_PREFIX}/bin/geos-config \
   PATH=${PACKAGE_PREFIX}/bin:$PATH
 
-# Set some useful env
-ENV \
-  LANG=en_US.UTF-8 \
-  LC_ALL=en_US.UTF-8 \
-  CFLAGS="--std=c99"
+# Copy local files or install modules
 
-# Copy any local files to the package
-COPY handler.py ${PACKAGE_PREFIX}/handler.py
-
-# This is needed for rasterio
-RUN pip3 install cython numpy --no-binary numpy
-
-# Install some requirements to `/var/task` (using `-t` otpion)
-RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
-
-# Reduce size of the C libs
-RUN cd $PACKAGE_PREFIX && find lib -name \*.so\* -exec strip {} \;
-
-# Create package.zip
+# Create package.zip (we zip the whole content of $PACKAGE_PREFIX because we moved the gdal libs over)
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
-Or if you are working with python, you can use lambgeo pre-build docker images:
+If you are working with **python3.8|3.9**, you can use lambgeo pre-build docker images:
 
 ```Dockerfile
-FROM lambgeo/lambda-gdal:3.2-python3.8
+FROM ghcr.io/lambgeo/lambda-gdal:3.5-python3.9
+
+ENV PACKAGE_PREFIX=/var/task
 
 # Copy any local files to the package
 COPY handler.py ${PACKAGE_PREFIX}/handler.py
@@ -102,12 +76,15 @@ RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}
 RUN cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
 
 # Create package.zip
+# Archive python code (installed in $PACKAGE_PREFIX/)
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
+
+# Archive GDAL libs (in $PREFIX/lib $PREFIX/bin $PREFIX/share)
 RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so* share
 RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack
 ```
 
-2. Build and create package.zip
+### 2. Build and create package.zip
 
 ```bash
 docker build --tag package:latest .
@@ -129,29 +106,30 @@ package.zip
   |___ other python module
 ```
 
-3. Deploy and Set Environment variables
+### 3. Deploy and Set Environment variables
 
-For Rasterio or other libraries to be aware of GDAL/PROJ C libraries, you need to set up those 2 envs:
+Libraries might need to be aware of GDAL/PROJ C libraries so you **HAVE TO** to set up those 2 envs:
 - **GDAL_DATA:** /var/task/share/gdal
 - **PROJ_LIB:** /var/task/share/proj
 
-### Other variable
+Other variables:
 
 Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote grids: https://proj.org/usage/network.html
 
 ---
 
-## AWS Lambda Layers
+# AWS Lambda Layers
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
-3.3  |                   2|      27.7|               67.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
-3.2  |                   2|      26.7|               64.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
+3.5  |                   1|         0|                   0| arn:aws:lambda:{REGION}:524387336408:layer:gdal35:{VERSION}
 
 ### archived
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
+3.3  |                   2|      27.7|               67.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
+3.2  |                   2|      26.7|               64.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
 3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
 2.4  |                   2|      19.5|               63.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
 
@@ -163,38 +141,8 @@ cat layer.json| jq '.[] | select(.region == "us-west-2")'
   "region": "us-west-2",
   "layers": [
     {
-      "name": "gdal24",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal24:4",
-      "version": 4
-    },
-    {
-      "name": "gdal31",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal31:4",
-      "version": 4
-    },
-    {
-      "name": "gdal32",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal32:4",
-      "version": 4
-    },
-    {
-      "name": "gdal24-al2",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal24-al2:3",
-      "version": 3
-    },
-    {
-      "name": "gdal31-al2",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal31-al2:3",
-      "version": 3
-    },
-    {
-      "name": "gdal32-al2",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal32-al2:5",
-      "version": 5
-    },
-    {
-      "name": "gdal33-al2",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal33-al2:1",
+      "name": "gdal35",
+      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal35:1",
       "version": 1
     }
   ]
@@ -210,18 +158,18 @@ layer.zip
   |___ share/    # GDAL/PROJ data directories
 ```
 
-The layer content will be unzip in `/opt` directory in AWS Lambda. For the python libs to be able to use the C libraries you have to make sure to set 2 important environment variables:
+At Lambda runtime, the layer content will be unzipped in the `/opt` directory. To be able to use the C libraries you **HAVE TO** make sure to set 2 important environment variables:
 
 - **GDAL_DATA:** /opt/share/gdal
 - **PROJ_LIB:** /opt/share/proj
 
-### How To
+## How To Use
 
 There are 2 ways to use the layers:
 
-#### 1. Simple (No dependencies)
+### 1. Simple (No dependencies)
 
-If you don't need to add more runtime dependencies, you can just create a lambda package (zip file) with you lambda handler.
+If you don't need to add more runtime dependencies, you can just create a lambda package (zip file) with your lambda handler.
 
 ```bash
 zip -r9q package.zip handler.py
@@ -235,30 +183,30 @@ package.zip
 ```
 
 **AWS Lambda Config:**
-- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal32:1` (example)
+- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal35:1` (example)
 - env:
   - **GDAL_DATA:** /opt/share/gdal
   - **PROJ_LIB:** /opt/share/proj
 - lambda handler: `handler.handler`
 
 
-#### 2. Advanced (need other python dependencies)
+### 2. Advanced (need other dependencies)
 
-If your lambda handler needs more dependencies you'll have to use the exact same environment. To ease this you can find the docker images for each lambda on docker hub.
+If your lambda handler needs more dependencies you'll have to use the exact same environment create the package.
 
-- Create a docker file
+#### Create a Dockerfile
 
 ```dockerfile
-FROM lambgeo/lambda-gdal:3.2-al2
+FROM ghcr.io/lambgeo/lambda-gdal:3.5 as gdal
 
-# We use lambci docker image for the runtime
-FROM lambci/lambda:build-python3.8
+FROM public.ecr.aws/lambda/python:3.9
 
 # Bring C libs from lambgeo/lambda-gdal image
 COPY --from=gdal /opt/lib/ /opt/lib/
 COPY --from=gdal /opt/include/ /opt/include/
 COPY --from=gdal /opt/share/ /opt/share/
 COPY --from=gdal /opt/bin/ /opt/bin/
+
 ENV \
   GDAL_DATA=/opt/share/gdal \
   PROJ_LIB=/opt/share/proj \
@@ -266,26 +214,16 @@ ENV \
   GEOS_CONFIG=/opt/bin/geos-config \
   PATH=/opt/bin:$PATH
 
-# Set some useful env
-ENV \
-  LANG=en_US.UTF-8 \
-  LC_ALL=en_US.UTF-8 \
-  CFLAGS="--std=c99"
+ENV PACKAGE_PREFIX=/var/task
 
-ENV PYTHONUSERBASE=/var/task
+# Copy local files
+COPY handler.py ${PACKAGE_PREFIX}/handler.py
 
-# Install dependencies
-COPY handler.py $PYTHONUSERBASE/handler.py
+# install package
+RUN ...
 
-# Here we use the `--user` option to make sure to not replicate modules.
-RUN pip install rio-tiler --user
-
-# Move some files around
-RUN mv ${PYTHONUSERBASE}/lib/python3.8/site-packages/* ${PYTHONUSERBASE}/
-RUN rm -rf ${PYTHONUSERBASE}/lib
-
-echo "Create archive"
-RUN cd $PYTHONUSERBASE && zip -r9q /tmp/package.zip *
+# Create package.zip
+RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
 - create package
@@ -308,7 +246,9 @@ package.zip
   |___ ...
 ```
 
-
-### Refactor
-
-We recently refactored the repo, to see old documentation please refer to https://github.com/lambgeo/docker-lambda/tree/ef66339724b1b7e1a375df912dfd58a9c59ac109
+**AWS Lambda Config:**
+- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal35:1` (example)
+- env:
+  - **GDAL_DATA:** /opt/share/gdal
+  - **PROJ_LIB:** /opt/share/proj
+- lambda handler: `handler.handler`
