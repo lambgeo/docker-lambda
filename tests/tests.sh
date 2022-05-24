@@ -25,10 +25,10 @@ if [[ ! "$(ldd $PREFIX/bin/gdalwarp | grep '/opt/bin/../lib/libsqlite3')" ]]; th
 echo "OK"
 
 echo "Checking OGR"
-if [[ ! "$(ogrinfo fixtures/map.geojson | grep 'GeoJSON')" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(ogrinfo fixtures/POLYGON.shp | grep 'ESRI Shapefile')" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(ogrinfo fixtures/MSK_CLOUDS_B00.gml | grep 'GML')" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(ogrinfo fixtures/square.dxf | grep 'DXF')" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(ogrinfo /local/tests/fixtures/map.geojson | grep 'successful')" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(ogrinfo /local/tests/fixtures/POLYGON.shp | grep 'successful')" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(ogrinfo /local/tests/fixtures/MSK_CLOUDS_B00.gml | grep 'successful')" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(ogrinfo /local/tests/fixtures/square.dxf | grep 'successful')" ]]; then echo "NOK" && exit 1; fi
 echo "OK"
 
 if [ "${version}" != "2.4.4" ]; then
@@ -40,10 +40,10 @@ if [ "${version}" != "2.4.4" ]; then
 fi
 
 echo "Checking Reading COG"
-if [[ ! "$(gdal_translate fixtures/cog.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(gdal_translate fixtures/cog_webp.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(gdal_translate fixtures/cog_jpeg.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(gdal_translate fixtures/cog_zstd.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(gdal_translate /local/tests/fixtures/cog.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(gdal_translate /local/tests/fixtures/cog_webp.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(gdal_translate /local/tests/fixtures/cog_jpeg.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(gdal_translate /local/tests/fixtures/cog_zstd.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
 echo "OK"
 
 exit 0
