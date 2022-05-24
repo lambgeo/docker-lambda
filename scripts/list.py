@@ -21,13 +21,13 @@ AWS_REGIONS = [
     "us-west-2",
 ]
 layers = [
-    "gdal24",  # archive
-    "gdal31",  # archive
-    "gdal32",  # archive
-    "gdal24-al2",  # archive
-    "gdal31-al2",  # archive
-    "gdal32-al2",  # archive
-    "gdal33-al2",  # archive
+    # "gdal24",  # archive
+    # "gdal31",  # archive
+    # "gdal32",  # archive
+    # "gdal24-al2",  # archive
+    # "gdal31-al2",  # archive
+    # "gdal32-al2",  # archive
+    # "gdal33-al2",  # archive
     "gdal35",
 ]
 
