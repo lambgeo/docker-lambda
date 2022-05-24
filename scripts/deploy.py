@@ -24,24 +24,16 @@ AWS_REGIONS = [
     "us-west-2",
 ]
 
-CompatibleRuntimes_al1 = [
-    "java8",
-    "python2.7",
-    "python3.6",
-    "python3.7",
-    "dotnetcore2.1",
-    "go1.x",
-    "ruby2.5",
-    "provided",
-]
 
 CompatibleRuntimes_al2 = [
-    "nodejs10.x",
     "nodejs12.x",
     "nodejs14.x",
+    "nodejs16.x",
     "java11",
     "java8.al2",
     "python3.8",
+    "python3.9",
+    "dotnet6",
     "dotnetcore3.1",
     "ruby2.7",
     "provided.al2",
@@ -54,7 +46,7 @@ CompatibleRuntimes_al2 = [
 def main(gdalversion, deploy):
     """Build and Deploy Layers."""
     gdalversion_nodot = gdalversion.replace(".", "")
-    layer_name = f"gdal{gdalversion_nodot}-al2"
+    layer_name = f"gdal{gdalversion_nodot}"
     description = f"Lambda Layer with GDAL{gdalversion} for amazonlinux2"
 
     if deploy:

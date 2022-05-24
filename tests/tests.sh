@@ -5,17 +5,18 @@ echo Running tests for GDAL ${version}
 
 echo "Checking formats"
 if [[ ! "$(gdal-config --prefix | grep $PREFIX)" ]]; then echo "NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'openjpeg')" ]]; then echo "openjpeg NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'gtiff')" ]]; then echo "gtiff NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'mbtiles')" ]]; then echo "mbtiles NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'webp')" ]]; then echo "webp NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'jpeg')" ]]; then echo "jpeg NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'png')" ]]; then echo "png NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'netcdf')" ]]; then echo "netcdf NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'hdf5')" ]]; then echo "hdf5 NOK" && exit 1; fi
-if [[ ! "$(gdal-config --formats | grep 'hdf4')" ]]; then echo "hdf4 NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'JP2OpenJPEG')" ]]; then echo "JP2OpenJPEG NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'GTIFF')" ]]; then echo "GTIFF NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'MBTiles')" ]]; then echo "MBTiles NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'WEBP')" ]]; then echo "WEBP NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'JPEG')" ]]; then echo "JPEG NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'PNG')" ]]; then echo "PNG NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'netCDF')" ]]; then echo "netCDF NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'Zarr')" ]]; then echo "Zarr NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'HDF5')" ]]; then echo "HDF5 NOK" && exit 1; fi
+if [[ ! "$(gdal-config --formats | grep 'HDF4')" ]]; then echo "HDF4 NOK" && exit 1; fi
 if [[ ! "$(ogrinfo --formats | grep 'GML')" ]]; then echo "GLM NOK" && exit 1; fi
-if [[ ! "$(ogrinfo --formats | grep 'PostgreSQL')" ]]; then echo "PostGres NOK" && exit 1; fi
+if [[ ! "$(ogrinfo --formats | grep 'PostgreSQL')" ]]; then echo "PostgreSQL NOK" && exit 1; fi
 if [[ ! "$(ogrinfo --formats | grep 'DXF')" ]]; then echo "DXF NOK" && exit 1; fi
 echo "OK"
 

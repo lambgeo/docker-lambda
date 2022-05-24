@@ -3,8 +3,7 @@ name: CI
 on:
   push:
     paths:
-    - '**Dockerfile'
-    - 'dockerfiles/runtimes/**'
+    - 'dockerfiles/**'
     - 'scripts/deploy.py'
     - 'scripts/create-layer.sh'
     - 'tests/*'
@@ -20,25 +19,26 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        gdal-version: [3.2, 3.3]
+        gdal-version: [3.5]
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python 3.8
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install boto3 click
 
-      - name: Login to DockerHub
+      - name: Login to Github
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -47,30 +47,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: setup Common cache
-        uses: actions/cache@v2
-        id: common-cache
-        with:
-          path: /tmp/docker
-          key: ${{ hashFiles('dockerfiles/common/Dockerfile') }}
-
-      - name: Restore Common image
-        if: steps.common-cache.outputs.cache-hit == 'true'
-        run: docker image load -i /tmp/docker/common.tar
-
-      - name: Build and Cache Common image
-        if: steps.common-cache.outputs.cache-hit != 'true'
-        run: |
-          docker build -f dockerfiles/common/Dockerfile -t lambda-gdal:common .
-          mkdir -p /tmp/docker
-          docker image save -o /tmp/docker/common.tar lambda-gdal:common
-
       - name: setup GDAL cache
         uses: actions/cache@v2
         id: gdal-cache
         with:
           path: /tmp/docker
-          key: gdal${{ matrix.gdal-version }}-${{ hashFiles(format('dockerfiles/gdal{0}/Dockerfile', matrix.gdal-version)) }}-${{ hashFiles('dockerfiles/common/Dockerfile') }}
+          key: gdal${{ matrix.gdal-version }}-${{ hashFiles(format('dockerfiles/Dockerfile.{0}', matrix.gdal-version)) }}
 
       - name: Restore gdal image
         if: steps.gdal-cache.outputs.cache-hit == 'true'
@@ -80,18 +62,18 @@ jobs:
         if: steps.gdal-cache.outputs.cache-hit != 'true'
         run: |
           docker build \
-            -f dockerfiles/gdal${{ matrix.gdal-version }}/Dockerfile \
-            -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2 .
+            -f dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }} \
+            -t ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }} .
           mkdir -p /tmp/docker
           docker image save \
             -o /tmp/docker/gdal${{ matrix.gdal-version }}.tar \
-            lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2
+            ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}
 
       - name: Run Tests
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2 \
+            ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }} \
             sh -c "cd /local/tests && sh tests.sh"
 
       - name: Build and Deploy layers
@@ -99,23 +81,25 @@ jobs:
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2 \
+            ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }} \
             sh -c "sh /local/scripts/create-layer.sh"
 
           python scripts/deploy.py ${{ matrix.gdal-version }} --deploy
 
-      - name: Push to DockerHub
+      - name: Push to registery
         if: github.ref == 'refs/heads/master'
-        run: docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-al2
+        run: |
+          docker push ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}
 
       - name: Build Runtime and Push to DockerHub
         if: github.ref == 'refs/heads/master'
         run: |
-          runtimes='python3.8'
+          runtimes='3.8 3.9'
           for runtime in ${runtimes}; do
             docker build \
               --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
-              -f dockerfiles/runtimes/${runtime} \
-              -t lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime} .
-            docker push lambgeo/lambda-gdal:${{ matrix.gdal-version }}-${runtime}
+              --build-arg RUNTIME_VERSION=${runtime} \
+              -f dockerfiles/runtimes/python \
+              -t ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime} .
+            docker push ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime}
           done

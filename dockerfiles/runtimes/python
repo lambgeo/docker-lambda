@@ -1,8 +1,9 @@
 ARG GDAL_VERSION
+ARG RUNTIME_VERSION
 
-FROM lambgeo/lambda-gdal:${GDAL_VERSION}-al2 as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION} as gdal
 
-FROM lambci/lambda:build-python3.8
+FROM public.ecr.aws/lambda/python:${RUNTIME_VERSION}
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
@@ -11,9 +12,10 @@ ENV \
   LC_ALL=en_US.UTF-8 \
   CFLAGS="--std=c99"
 
+RUN yum install -y gcc gcc-c++
 RUN \
-    pip3 install pip -U \
-    && pip3 install cython numpy --no-binary numpy
+    python -m pip install pip -U \
+    && python -m pip install cython numpy wheel --no-binary numpy
 
 # The PREFIX should be the same as in gdal{version}:latest
 # When building rasterio, setup.py will get libs directoy from gdal-config
@@ -36,3 +38,5 @@ ENV \
 RUN export GDAL_VERSION=$(gdal-config --version)
 
 RUN mkdir ${PREFIX}/python
+
+ENTRYPOINT bash
