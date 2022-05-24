@@ -77,6 +77,7 @@ jobs:
           context: .
           file: dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }}
           push: true
+          cache-from: type=gha
           tags: ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}
 
       - name: Build and Deploy layers
