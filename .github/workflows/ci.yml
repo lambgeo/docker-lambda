@@ -41,7 +41,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS Credentials
@@ -58,7 +58,7 @@ jobs:
           context: .
           load: true
           file: dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }}
-          tags: ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}
+          tags: ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -66,7 +66,7 @@ jobs:
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }} \
+            ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }} \
             sh -c "cd /local/tests && sh tests.sh"
 
       - name: Publish docker image
@@ -78,14 +78,14 @@ jobs:
           file: dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }}
           push: true
           cache-from: type=gha
-          tags: ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}
+          tags: ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}
 
       - name: Build and Deploy layers
         if: github.ref == 'refs/heads/master'
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
-            ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }} \
+            ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }} \
             sh -c "sh /local/scripts/create-layer.sh"
           python scripts/deploy.py ${{ matrix.gdal-version }} --deploy
 
@@ -99,6 +99,6 @@ jobs:
               --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
               --build-arg RUNTIME_VERSION=${runtime} \
               -f dockerfiles/runtimes/python \
-              -t ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime} .
-            docker push ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime}
+              -t ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime} .
+            docker push ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime}
           done
