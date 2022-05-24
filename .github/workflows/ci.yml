@@ -66,6 +66,7 @@ jobs:
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
+            --platform=linux/amd64 \
             ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }} \
             sh -c "cd /local/tests && sh tests.sh"
 
@@ -85,6 +86,7 @@ jobs:
         run: |
           docker run \
             -v ${{ github.workspace }}:/local --rm \
+            --platform=linux/amd64 \
             ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }} \
             sh -c "sh /local/scripts/create-layer.sh"
           python scripts/deploy.py ${{ matrix.gdal-version }} --deploy
