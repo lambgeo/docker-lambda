@@ -56,6 +56,7 @@ jobs:
         with:
           platforms: linux/amd64
           context: .
+          load: true
           file: dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }}
           tags: ghcr.io/${{ github.actor }}/lambda-gdal:${{ matrix.gdal-version }}
           cache-from: type=gha
