@@ -1,7 +1,7 @@
 ARG GDAL_VERSION
 ARG RUNTIME_VERSION
 
-FROM lambgeo/lambda-gdal:${GDAL_VERSION} as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION} as gdal
 
 FROM public.ecr.aws/lambda/python:${RUNTIME_VERSION}
 
