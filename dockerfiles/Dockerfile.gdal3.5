@@ -299,11 +299,11 @@ RUN mkdir /tmp/netcdf \
 #   && rm -rf /tmp/jxl
 
 # We use commit sha to make sure we are not using `cache` when building the docker image
-# https://github.com/OSGeo/gdal/archive/ada3e517416596430872656e74e2c99648e03402.zip is the latest commit on release/3.5 branch
+# "ada3e517416596430872656e74e2c99648e03402" is the latest commit on release/3.5 branch
 
 # gdal
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/ada3e517416596430872656e74e2c99648e03402.zip | tar zxf - -C /tmp/gdal --strip-components=1 \
+  && curl -sfL https://github.com/OSGeo/gdal/archive/ada3e517416596430872656e74e2c99648e03402.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
   && cd /tmp/gdal \
   && mkdir build && cd build \
   && cmake3 .. \
