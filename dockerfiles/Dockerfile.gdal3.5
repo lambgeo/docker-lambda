@@ -44,6 +44,32 @@ ENV \
   SQLITE3_CFLAGS="$CFLAGS -I${PREFIX}/include" \
   PATH=${PREFIX}/bin/:$PATH
 
+# libxml2
+RUN mkdir /tmp/libxml2 \
+  && curl -sfL https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.10/libxml2-v2.9.10.tar.gz | tar zxf - -C /tmp/libxml2 --strip-components=1  \
+  && cd /tmp/libxml2 \
+  && ./autogen.sh --prefix=$PREFIX --with-ftp=no --with-http=no --with-python=no \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/libxml2
+
+# nghttp2
+ENV NGHTTP2_VERSION=1.42.0
+RUN mkdir /tmp/nghttp2 \
+  && curl -sfL https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.gz | tar zxf - -C /tmp/nghttp2 --strip-components=1 \
+  && cd /tmp/nghttp2 \
+  && ./configure --enable-lib-only --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/nghttp2
+
+# libcurl
+ENV CURL_VERSION=7.73.0
+RUN mkdir /tmp/libcurl \
+  && curl -sfL https://curl.haxx.se/download/curl-${CURL_VERSION}.tar.gz | tar zxf - -C /tmp/libcurl --strip-components=1 \
+  && cd /tmp/libcurl \
+  && ./configure --disable-manual --disable-cookies --with-nghttp2=$PREFIX --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install \
+  && rm -rf /tmp/libcurl
+
 # libdeflate
 RUN mkdir /tmp/libdeflate \
   && curl -sfL https://github.com/ebiggers/libdeflate/archive/v1.10.tar.gz | tar zxf - -C /tmp/libdeflate --strip-components=1 \
@@ -221,7 +247,6 @@ RUN mkdir /tmp/cryptopp \
   && cd /tmp/cryptopp \
   && make -j $(nproc) --silent && make install PREFIX=$PREFIX \
   && rm -rf /tmp/cryptopp
-
 
 # szip (for hdf)
 ENV SZIP_VERSION=2.1.1
