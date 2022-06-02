@@ -106,3 +106,35 @@ jobs:
               -t ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime} .
             docker push ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}-python${runtime}
           done
+
+  update-layer:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: actions/setup-node@v1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: List layers
+        run: |
+          python scripts/list.py | jq > layer.json
+
+      - name: Update resources
+        uses: test-room-7/action-update-file@v1
+        with:
+            file-path: layer.json
+            commit-msg: Update layer [skip ci]
+            github-token: ${{ secrets.GITHUB_TOKEN }}
