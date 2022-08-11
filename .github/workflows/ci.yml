@@ -20,7 +20,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        gdal-version: [3.5]
+        gdal-version: [3.5.1]
     steps:
       - uses: actions/checkout@v2
 
@@ -42,7 +42,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUBTOKEN }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -137,4 +137,4 @@ jobs:
         with:
             file-path: layer.json
             commit-msg: Update layer [skip ci]
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+            github-token: ${{ secrets.GITHUBTOKEN }}

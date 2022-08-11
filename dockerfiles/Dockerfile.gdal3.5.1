@@ -24,7 +24,7 @@ ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
 
 # sqlite
 RUN mkdir /tmp/sqlite \
-  && curl -sfL https://www.sqlite.org/2020/sqlite-autoconf-3330000.tar.gz | tar zxf - -C /tmp/sqlite --strip-components=1 \
+  && curl -sfL https://www.sqlite.org/2022/sqlite-autoconf-3390200.tar.gz | tar zxf - -C /tmp/sqlite --strip-components=1 \
   && cd /tmp/sqlite \
   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static \
   && make -j $(nproc) --silent && make install && make clean \
@@ -176,7 +176,7 @@ RUN mkdir /tmp/openjpeg \
   && rm -rf /tmp/openjpeg
 
 # geos
-ENV GEOS_VERSION=3.10.2
+ENV GEOS_VERSION=3.10.3
 RUN mkdir /tmp/geos \
   && curl -sfL https://github.com/libgeos/geos/archive/refs/tags/${GEOS_VERSION}.tar.gz | tar zxf - -C /tmp/geos --strip-components=1 \
   && cd /tmp/geos \
@@ -328,7 +328,7 @@ RUN mkdir /tmp/netcdf \
 
 # gdal
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/ada3e517416596430872656e74e2c99648e03402.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
+  && curl -sfL https://github.com/OSGeo/gdal/releases/download/v3.5.1/gdal-3.5.1.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
   && cd /tmp/gdal \
   && mkdir build && cd build \
   && cmake3 .. \
