@@ -124,17 +124,9 @@ gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
 3.5  |                   2|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal35:{VERSION}
 
-### archived
-
-gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
-  ---|                 ---|       ---|                ---| ---
-3.3  |                   2|      27.7|               67.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
-3.2  |                   2|      26.7|               64.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
-3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
-2.4  |                   2|      19.5|               63.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
-
 see [/layer.json](/layer.json) for the list of arns
 
+##### Find the arn version
 ```bash
 cat layer.json| jq '.[] | select(.region == "us-west-2")'
 {
@@ -148,6 +140,18 @@ cat layer.json| jq '.[] | select(.region == "us-west-2")'
   ]
 }
 ```
+
+#### archived layers
+
+gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
+  ---|                 ---|       ---|                ---| ---
+3.3  |                   2|      27.7|               67.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
+3.2  |                   2|      26.7|               64.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
+3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
+2.4  |                   2|      19.5|               63.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
+
+see [/archived_layer.json](/archived_layer.json) for the list of arns
+
 **Layer content:**
 
 ```
@@ -170,6 +174,8 @@ There are 2 ways to use the layers:
 ### 1. Simple (No dependencies)
 
 If you don't need to add more runtime dependencies, you can just create a lambda package (zip file) with your lambda handler.
+
+Note: This is unlikely, except if you are using GDAL bin (e.g `gdal_translate`) from a python script.
 
 ```bash
 zip -r9q package.zip handler.py
