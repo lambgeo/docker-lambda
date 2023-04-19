@@ -17,6 +17,9 @@ RUN \
     python -m pip install pip -U \
     && python -m pip install cython numpy wheel --no-binary numpy
 
+RUN yum clean all \
+    && rm -rf /var/cache/yum /var/lib/yum/history
+
 # The PREFIX should be the same as in gdal{version}:latest
 # When building rasterio, setup.py will get libs directoy from gdal-config
 # $ gdal-config --libs

@@ -20,7 +20,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        gdal-version: [3.5]
+        gdal-version: [3.6]
     steps:
       - uses: actions/checkout@v2
 
@@ -96,7 +96,7 @@ jobs:
       - name: Build Runtime and Push
         if: github.ref == 'refs/heads/master'
         run: |
-          runtimes='3.8 3.9'
+          runtimes='3.9 3.10 3.11-preview'
           for runtime in ${runtimes}; do
             docker build \
               --platform=linux/amd64 \

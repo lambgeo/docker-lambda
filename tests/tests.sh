@@ -44,6 +44,7 @@ if [[ ! "$(gdal_translate /local/tests/fixtures/cog.tif /tmp/tmp.tif | grep "don
 if [[ ! "$(gdal_translate /local/tests/fixtures/cog_webp.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(gdal_translate /local/tests/fixtures/cog_jpeg.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
 if [[ ! "$(gdal_translate /local/tests/fixtures/cog_zstd.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
+if [[ ! "$(gdal_translate /local/tests/fixtures/cog_lerc.tif /tmp/tmp.tif | grep "done.")" ]]; then echo "NOK" && exit 1; fi
 echo "OK"
 
 exit 0

@@ -17,14 +17,18 @@
 # Docker Images
 
 Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
-  - GDAL 3.5.0
-    - **ghcr.io/lambgeo/lambda-gdal:3.5** (May 2022)
-
+  - GDAL 3.6
+    - **ghcr.io/lambgeo/lambda-gdal:3.6** (Apr 2023)
 
 Runtimes images:
   - Python (based on `public.ecr.aws/lambda/python:{version}`)
-    - **ghcr.io/lambgeo/lambda-gdal:3.5-python3.9**
-    - **ghcr.io/lambgeo/lambda-gdal:3.5-python3.8**
+    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
+    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
+
+  - Python 3.11-preview (based on `public.ecr.aws/lambda/python:3.11-preview`)
+    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11-preview**
+
+see: https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal
 
 # Creating Lambda packages
 
@@ -33,7 +37,7 @@ Runtimes images:
 ### 1. Create Dockerfile
 
 ```Dockerfile
-FROM ghcr.io/lambgeo/lambda-gdal:3.5 as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
 # We use the official AWS Lambda image
 FROM public.ecr.aws/lambda/{RUNTIME: python|node|go...}:{RUNTIME version}
@@ -59,10 +63,10 @@ ENV \
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
-If you are working with **python3.8|3.9**, you can use lambgeo pre-build docker images:
+If you are working with **python3.9|3.10**, you can use lambgeo pre-build docker images:
 
 ```Dockerfile
-FROM ghcr.io/lambgeo/lambda-gdal:3.5-python3.9
+FROM ghcr.io/lambgeo/lambda-gdal:3.6-python3.10
 
 ENV PACKAGE_PREFIX=/var/task
 
@@ -122,7 +126,7 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote gr
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
-3.5  |                   2|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal35:{VERSION}
+3.6  |                   1|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal36:{VERSION}
 
 see [/layer.json](/layer.json) for the list of arns
 
@@ -133,8 +137,8 @@ cat layer.json| jq '.[] | select(.region == "us-west-2")'
   "region": "us-west-2",
   "layers": [
     {
-      "name": "gdal35",
-      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal35:1",
+      "name": "gdal36",
+      "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal36:1",
       "version": 1
     }
   ]
@@ -145,6 +149,7 @@ cat layer.json| jq '.[] | select(.region == "us-west-2")'
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
+3.5  |                   2|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal35:{VERSION}
 3.3  |                   2|      27.7|               67.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
 3.2  |                   2|      26.7|               64.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
 3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
@@ -189,7 +194,7 @@ package.zip
 ```
 
 **AWS Lambda Config:**
-- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal35:1` (example)
+- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal36:1` (example)
 - env:
   - **GDAL_DATA:** /opt/share/gdal
   - **PROJ_LIB:** /opt/share/proj
@@ -203,9 +208,9 @@ If your lambda handler needs more dependencies you'll have to use the exact same
 #### Create a Dockerfile
 
 ```dockerfile
-FROM ghcr.io/lambgeo/lambda-gdal:3.5 as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
-FROM public.ecr.aws/lambda/python:3.9
+FROM public.ecr.aws/lambda/python:3.10
 
 # Bring C libs from lambgeo/lambda-gdal image
 COPY --from=gdal /opt/lib/ /opt/lib/
@@ -253,7 +258,7 @@ package.zip
 ```
 
 **AWS Lambda Config:**
-- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal35:1` (example)
+- arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal36:1` (example)
 - env:
   - **GDAL_DATA:** /opt/share/gdal
   - **PROJ_LIB:** /opt/share/proj

@@ -133,7 +133,7 @@ RUN mkdir /tmp/lerc \
   && rm -rf /tmp/lerc
 
 # libtiff
-ENV LIBTIFF_VERSION=4.3.0
+ENV LIBTIFF_VERSION=4.5.0
 RUN mkdir /tmp/libtiff \
   && curl -sfL https://download.osgeo.org/libtiff/tiff-${LIBTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libtiff --strip-components=1 \
   && cd /tmp/libtiff \
@@ -151,7 +151,7 @@ RUN mkdir /tmp/libtiff \
   && rm -rf /tmp/libtiff
 
 # postgres
-ENV PG_VERSION=13.0
+ENV PG_VERSION=15.2
 RUN mkdir /tmp/postgres \
   && curl -sfL https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-${PG_VERSION}.tar.gz | tar zxf - -C /tmp/postgres --strip-components=1 \
   && cd /tmp/postgres \
@@ -160,7 +160,7 @@ RUN mkdir /tmp/postgres \
   && rm -rf /tmp/postgres
 
 # openjpeg
-ENV OPENJPEG_VERSION=2.4.0
+ENV OPENJPEG_VERSION=2.5.0
 RUN mkdir /tmp/openjpeg \
   && curl -sfL https://github.com/uclouvain/openjpeg/archive/v${OPENJPEG_VERSION}.tar.gz | tar zxf - -C /tmp/openjpeg --strip-components=1 \
   && cd /tmp/openjpeg \
@@ -176,7 +176,7 @@ RUN mkdir /tmp/openjpeg \
   && rm -rf /tmp/openjpeg
 
 # geos
-ENV GEOS_VERSION=3.10.2
+ENV GEOS_VERSION=3.11.2
 RUN mkdir /tmp/geos \
   && curl -sfL https://github.com/libgeos/geos/archive/refs/tags/${GEOS_VERSION}.tar.gz | tar zxf - -C /tmp/geos --strip-components=1 \
   && cd /tmp/geos \
@@ -192,18 +192,34 @@ RUN mkdir /tmp/geos \
 
 # proj
 # We still provide proj-datumgrid but the user can choose to set `PROJ_NETWORK=ON` to use network grids
-ENV PROJ_VERSION=8.2.1
+# ENV PROJ_VERSION=9.2.0
+# RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
+#   && curl -sfL https://github.com/OSGeo/proj/archive/${PROJ_VERSION}.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
+#   && curl -sfL http://download.osgeo.org/proj/proj-datumgrid-latest.tar.gz | tar zxf - -C /tmp/proj/data \
+#   && cd /tmp/proj \
+#   && aclocal && autoheader && libtoolize --force --copy && automake --add-missing --copy && autoconf \
+#   && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
+#   && make -j $(nproc) --silent && make install \
+#   && rm -rf /tmp/proj
+
+ENV PROJ_VERSION=9.2.0
 RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
   && curl -sfL https://github.com/OSGeo/proj/archive/${PROJ_VERSION}.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
-  && curl -sfL http://download.osgeo.org/proj/proj-datumgrid-latest.tar.gz | tar zxf - -C /tmp/proj/data \
   && cd /tmp/proj \
-  && aclocal && autoheader && libtoolize --force --copy && automake --add-missing --copy && autoconf \
-  && LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX --disable-static --enable-lto \
+  && mkdir build && cd build \
+  && cmake3 .. \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
+    -DCMAKE_INSTALL_LIBDIR:PATH=lib \
+    -DCMAKE_INSTALL_INCLUDEDIR:PATH=include \
+    -DBUILD_TESTING=OFF \
+    -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
+    -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/proj
 
 # GeoTIFF
-ENV LIBGEOTIFF_VERSION=1.6.0
+ENV LIBGEOTIFF_VERSION=1.7.1
 RUN mkdir /tmp/libgeotiff \
   && curl -sfL https://github.com/OSGeo/libgeotiff/releases/download/${LIBGEOTIFF_VERSION}/libgeotiff-${LIBGEOTIFF_VERSION}.tar.gz | tar zxf - -C /tmp/libgeotiff --strip-components=1 \
   && cd /tmp/libgeotiff \
@@ -303,7 +319,7 @@ RUN mkdir /tmp/netcdf \
   && make -j $(nproc) --silent && make install && make clean \
   && rm -rf /tmp/netcdf
 
-# JPEG-XL
+# # JPEG-XL
 # # libhwy
 # RUN mkdir /tmp/libhwy \
 #   && curl -sfL https://github.com/google/highway/archive/refs/tags/0.16.0.tar.gz | tar zxf - -C /tmp/libhwy --strip-components=1 \
@@ -313,10 +329,20 @@ RUN mkdir /tmp/netcdf \
 #   && make -j $(nproc) install && make clean \
 #   && rm -rf /tmp/libhwy
 
-# # JpegXL
-# ENV JXL_VERSION=0.6.1
+# # brotli
+# ENV BROTLI_VERSION=1.0.9
+# RUN mkdir /tmp/brotli \
+#   && curl -sfL https://github.com/google/brotli/archive/refs/tags/v${BROTLI_VERSION}.tar.gz | tar zxf - -C /tmp/brotli --strip-components=1 \
+#   && cd /tmp/brotli \
+#   && mkdir build && cd build \
+#   && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ../configure-cmake --prefix=$PREFIX \
+#   && make -j $(nproc) --silent && make install && make clean \
+#   && rm -rf /tmp/brotli
+
+# # # JpegXL
+# ENV JXL_VERSION=0.8.1
 # RUN mkdir /tmp/jxl \
-#   && curl -sfL https://github.com/libjxl/libjxl/archive/refs/tags/v0.6.1.tar.gz | tar zxf - -C /tmp/jxl --strip-components=1 \
+#   && curl -sfL https://github.com/libjxl/libjxl/archive/refs/tags/v${JXL_VERSION}.tar.gz | tar zxf - -C /tmp/jxl --strip-components=1 \
 #   && cd /tmp/jxl \
 #   && mkdir build && cd build \
 #   && cmake3 .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -324,14 +350,15 @@ RUN mkdir /tmp/netcdf \
 #   && rm -rf /tmp/jxl
 
 # We use commit sha to make sure we are not using `cache` when building the docker image
-# "ada3e517416596430872656e74e2c99648e03402" is the latest commit on release/3.5 branch
+# "7ca88116f5a46d429251361634eb24629f315076" is the latest commit on release/3.6 branch
 
 # gdal
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/ada3e517416596430872656e74e2c99648e03402.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
+  && curl -sfL https://github.com/OSGeo/gdal/archive/7ca88116f5a46d429251361634eb24629f315076.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
   && cd /tmp/gdal \
   && mkdir build && cd build \
   && cmake3 .. \
+    -DGDAL_USE_EXTERNAL_LIBS=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
