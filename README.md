@@ -126,7 +126,7 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote gr
 
 gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
   ---|                 ---|       ---|                ---| ---
-3.6  |                   1|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal36:{VERSION}
+3.6  |                   2|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal36:{VERSION}
 
 see [/layer.json](/layer.json) for the list of arns
 
@@ -172,7 +172,7 @@ At Lambda runtime, the layer content will be unzipped in the `/opt` directory. T
 - **GDAL_DATA:** /opt/share/gdal
 - **PROJ_LIB:** /opt/share/proj
 
-## How To Use
+## How To Use (Create a Lambda Package)
 
 There are 2 ways to use the layers:
 
@@ -203,13 +203,14 @@ package.zip
 
 ### 2. Advanced (need other dependencies)
 
-If your lambda handler needs more dependencies you'll have to use the exact same environment create the package.
+If your lambda handler needs more dependencies you'll have to use the exact same environment to create the package.
 
 #### Create a Dockerfile
 
 ```dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
+# This example assume that you are creating a lambda package for python 3.10
 FROM public.ecr.aws/lambda/python:3.10
 
 # Bring C libs from lambgeo/lambda-gdal image
@@ -231,7 +232,9 @@ ENV PACKAGE_PREFIX=/var/task
 COPY handler.py ${PACKAGE_PREFIX}/handler.py
 
 # install package
-RUN ...
+# This example shows how to install GDAL python bindings for gdal 3.6
+# The GDAL version should be the same as the one provided by the `lambgeo/lambda-gdal` image
+RUN python -m pip install GDAL==$(gdal-config --version) -t $PACKAGE_PREFIX
 
 # Create package.zip
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
