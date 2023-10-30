@@ -96,7 +96,7 @@ jobs:
       - name: Build Runtime and Push
         if: github.ref == 'refs/heads/master'
         run: |
-          runtimes='3.9 3.10 3.11-preview'
+          runtimes='3.9 3.10 3.11'
           for runtime in ${runtimes}; do
             docker build \
               --platform=linux/amd64 \

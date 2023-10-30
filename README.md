@@ -24,9 +24,7 @@ Runtimes images:
   - Python (based on `public.ecr.aws/lambda/python:{version}`)
     - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
     - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
-
-  - Python 3.11-preview (based on `public.ecr.aws/lambda/python:3.11-preview`)
-    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11-preview**
+    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11**
 
 see: https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal
 
@@ -63,7 +61,7 @@ ENV \
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
-If you are working with **python3.9|3.10**, you can use lambgeo pre-build docker images:
+If you are working with **python3.9|3.10|3.11**, you can use lambgeo pre-build docker images:
 
 ```Dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.6-python3.10
@@ -124,9 +122,9 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote gr
 
 # AWS Lambda Layers
 
-gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
-  ---|                 ---|       ---|                ---| ---
-3.6  |                   2|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal36:{VERSION}
+| gdal | amazonlinux version | size (Mb) | unzipped size (Mb) | arn                                                         |
+| ---- | ------------------- | --------- | ------------------ | ----------------------------------------------------------- |
+| 3.6  | 2                   | 30.5      | 73.4               | arn:aws:lambda:{REGION}:524387336408:layer:gdal36:{VERSION} |
 
 see [/layer.json](/layer.json) for the list of arns
 
@@ -147,13 +145,13 @@ cat layer.json| jq '.[] | select(.region == "us-west-2")'
 
 #### archived layers
 
-gdal | amazonlinux version| size (Mb)| unzipped size (Mb)| arn
-  ---|                 ---|       ---|                ---| ---
-3.5  |                   2|      30.5|               73.4| arn:aws:lambda:{REGION}:524387336408:layer:gdal35:{VERSION}
-3.3  |                   2|      27.7|               67.3| arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION}
-3.2  |                   2|      26.7|               64.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION}
-3.1  |                   2|      25.8|                 61| arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION}
-2.4  |                   2|      19.5|               63.6| arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION}
+| gdal | amazonlinux version | size (Mb) | unzipped size (Mb) | arn                                                             |
+| ---- | ------------------- | --------- | ------------------ | --------------------------------------------------------------- |
+| 3.5  | 2                   | 30.5      | 73.4               | arn:aws:lambda:{REGION}:524387336408:layer:gdal35:{VERSION}     |
+| 3.3  | 2                   | 27.7      | 67.3               | arn:aws:lambda:{REGION}:524387336408:layer:gdal33-al2:{VERSION} |
+| 3.2  | 2                   | 26.7      | 64.6               | arn:aws:lambda:{REGION}:524387336408:layer:gdal32-al2:{VERSION} |
+| 3.1  | 2                   | 25.8      | 61                 | arn:aws:lambda:{REGION}:524387336408:layer:gdal31-al2:{VERSION} |
+| 2.4  | 2                   | 19.5      | 63.6               | arn:aws:lambda:{REGION}:524387336408:layer:gdal24-al2:{VERSION} |
 
 see [/archived_layer.json](/archived_layer.json) for the list of arns
 
