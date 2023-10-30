@@ -96,10 +96,10 @@ jobs:
       - name: Build Runtime and Push
         if: github.ref == 'refs/heads/master'
         run: |
-          runtimes='3.9 3.10 3.11-preview'
+          runtimes='3.9 3.10 3.11'
           for runtime in ${runtimes}; do
             docker build \
-              --platform=linux/amd64 \
+              --platform=linux/amd6--platform=linux/amd644 \
               --build-arg GDAL_VERSION=${{ matrix.gdal-version }} \
               --build-arg RUNTIME_VERSION=${runtime} \
               -f dockerfiles/runtimes/python \

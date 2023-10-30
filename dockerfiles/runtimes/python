@@ -12,13 +12,13 @@ ENV \
   LC_ALL=en_US.UTF-8 \
   CFLAGS="--std=c99"
 
-RUN yum install -y gcc gcc-c++
+RUN yum install -y gcc gcc-c++ && \
+    yum clean all && \
+    rm -rf /var/cache/yum /var/lib/yum/history
+
 RUN \
     python -m pip install pip -U \
-    && python -m pip install cython numpy wheel --no-binary numpy
-
-RUN yum clean all \
-    && rm -rf /var/cache/yum /var/lib/yum/history
+    && python -m pip install cython numpy==1.25 wheel --no-binary numpy
 
 # The PREFIX should be the same as in gdal{version}:latest
 # When building rasterio, setup.py will get libs directoy from gdal-config
