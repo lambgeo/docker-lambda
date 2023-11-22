@@ -20,7 +20,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        gdal-version: [3.6]
+        gdal-version: ["3.6.4", "3.7.3", "3.8.0"]
     steps:
       - uses: actions/checkout@v4
 
@@ -35,22 +35,31 @@ jobs:
           python -m pip install boto3 click
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Github
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64
           context: .
           load: true
-          file: dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }}
+          file: dockerfiles/Dockerfile
+          build-args: |
+            GDAL_VERSION=${{ matrix.gdal-version }}
           tags: ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -74,12 +83,14 @@ jobs:
           aws-region: us-east-1
 
       - name: Publish docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         if: github.ref == 'refs/heads/master'
         with:
           platforms: linux/amd64
           context: .
-          file: dockerfiles/Dockerfile.gdal${{ matrix.gdal-version }}
+          file: dockerfiles/Dockerfile
+          build-args: |
+            GDAL_VERSION=${{ matrix.gdal-version }}
           push: true
           cache-from: type=gha
           tags: ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ matrix.gdal-version }}
@@ -124,7 +135,7 @@ jobs:
       - uses: actions/setup-node@v4
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -136,7 +147,7 @@ jobs:
           python scripts/list.py | jq > layer.json
 
       - name: Update resources
-        uses: test-room-7/action-update-file@v1
+        uses: test-room-7/action-update-file@v1.8.0
         with:
             file-path: layer.json
             commit-msg: Update layer [skip ci]

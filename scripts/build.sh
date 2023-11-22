@@ -8,7 +8,8 @@ echo "Building image for AWS Lambda | GDAL: ${GDAL_VERSION} | Runtime: ${RUNTIME
 
 docker buildx build \
     --platform=linux/amd64 \
-    -f dockerfiles/Dockerfile.gdal${GDAL_VERSION} \
+    --build-arg GDAL_VERSION=${GDAL_VERSION} \
+    -f dockerfiles/Dockerfile \
     -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION} .
 
 docker buildx build \
