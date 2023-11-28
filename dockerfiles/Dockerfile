@@ -357,9 +357,11 @@ RUN mkdir /tmp/netcdf \
 # We use commit sha to make sure we are not using `cache` when building the docker image
 # "7ca88116f5a46d429251361634eb24629f315076" is the latest commit on release/3.6 branch
 
-# gdal
+
+# GDAL
+ARG GDAL_VERSION
 RUN mkdir /tmp/gdal \
-  && curl -sfL https://github.com/OSGeo/gdal/archive/7ca88116f5a46d429251361634eb24629f315076.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
+  && curl -sfL https://github.com/OSGeo/gdal/archive/refs/tags/v${GDAL_VERSION}.tar.gz | tar zxf - -C /tmp/gdal --strip-components=1 \
   && cd /tmp/gdal \
   && mkdir build && cd build \
   && cmake3 .. \
