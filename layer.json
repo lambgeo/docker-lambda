@@ -3,9 +3,9 @@
     "region": "ap-northeast-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:ap-northeast-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:ap-northeast-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -13,9 +13,9 @@
     "region": "ap-northeast-2",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:ap-northeast-2:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:ap-northeast-2:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -23,9 +23,9 @@
     "region": "ap-south-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:ap-south-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:ap-south-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -33,9 +33,9 @@
     "region": "ap-southeast-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:ap-southeast-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:ap-southeast-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -43,9 +43,9 @@
     "region": "ap-southeast-2",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:ap-southeast-2:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:ap-southeast-2:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -53,9 +53,9 @@
     "region": "ca-central-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:ca-central-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:ca-central-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -63,9 +63,9 @@
     "region": "eu-central-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:eu-central-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:eu-central-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -73,9 +73,9 @@
     "region": "eu-north-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:eu-north-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:eu-north-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -83,9 +83,9 @@
     "region": "eu-west-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:eu-west-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:eu-west-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -93,9 +93,9 @@
     "region": "eu-west-2",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:eu-west-2:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:eu-west-2:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -103,9 +103,9 @@
     "region": "eu-west-3",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:eu-west-3:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:eu-west-3:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -113,9 +113,9 @@
     "region": "sa-east-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:sa-east-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:sa-east-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -123,9 +123,9 @@
     "region": "us-east-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:us-east-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:us-east-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -133,9 +133,9 @@
     "region": "us-east-2",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:us-east-2:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:us-east-2:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -143,9 +143,9 @@
     "region": "us-west-1",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:us-west-1:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:us-west-1:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   },
@@ -153,9 +153,9 @@
     "region": "us-west-2",
     "layers": [
       {
-        "name": "gdal36",
-        "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal36:2",
-        "version": 2
+        "name": "gdal38",
+        "arn": "arn:aws:lambda:us-west-2:524387336408:layer:gdal38:1",
+        "version": 1
       }
     ]
   }
