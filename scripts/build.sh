@@ -1,6 +1,7 @@
 #!/bin/bash
 
 GDAL_VERSION=$1
+GDAL_VERSION_TAG=${GDAL_VERSION%.*}
 RUNTIME=$2
 RUNTIME_VERSION=$3
 
@@ -10,11 +11,11 @@ docker buildx build \
     --platform=linux/amd64 \
     --build-arg GDAL_VERSION=${GDAL_VERSION} \
     -f dockerfiles/Dockerfile \
-    -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION} .
+    -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION_TAG} .
 
 docker buildx build \
     --platform=linux/amd64 \
     --build-arg GDAL_VERSION=${GDAL_VERSION} \
     --build-arg RUNTIME_VERSION=${RUNTIME_VERSION} \
     -f dockerfiles/runtimes/${RUNTIME} \
-    -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION}-${RUNTIME}${RUNTIME_VERSION} .
+    -t ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION_TAG}-${RUNTIME}${RUNTIME_VERSION} .

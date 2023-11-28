@@ -357,6 +357,7 @@ RUN mkdir /tmp/netcdf \
 # We use commit sha to make sure we are not using `cache` when building the docker image
 # "7ca88116f5a46d429251361634eb24629f315076" is the latest commit on release/3.6 branch
 
+
 # GDAL
 ARG GDAL_VERSION
 RUN mkdir /tmp/gdal \
@@ -382,8 +383,8 @@ RUN mkdir /tmp/gdal \
   && make -j $(nproc) --silent && make install \
   && rm -rf /tmp/gdal
 
-# patchelf
 # from https://github.com/pypa/manylinux/blob/d8ef5d47433ba771fa4403fd48f352c586e06e43/docker/build_scripts/build.sh#L133-L138
+# Install patchelf (latest with unreleased bug fixes)
 ENV PATCHELF_VERSION=0.10
 RUN mkdir /tmp/patchelf \
   && curl -sfL https://github.com/NixOS/patchelf/archive/${PATCHELF_VERSION}.tar.gz | tar zxf - -C /tmp/patchelf --strip-components=1 \
