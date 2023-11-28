@@ -2,8 +2,13 @@ FROM public.ecr.aws/lambda/provided:al2 as builder
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
-RUN yum makecache fast
-RUN yum install -y git autoconf libtool flex bison cmake make tar gzip gcc gcc-c++ automake16 libpng-devel nasm libxml2-devel readline-devel openssl-devel curl-devel cmake3
+RUN yum update -y && \
+    yum install -y git autoconf libtool flex bison cmake make \
+      tar gzip gcc gcc-c++ automake16 libpng-devel nasm \
+      libxml2-devel readline-devel openssl-devel curl-devel \
+      cmake3 && \
+    yum clean all && \
+    rm -rf /var/cache/yum /var/lib/yum/history
 
 ENV PREFIX /opt
 

@@ -1,38 +1,41 @@
 
-# GDAL based docker image made for AWS Lambda
+# GDAL-based Docker Image for AWS Lambda
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <img src="https://user-images.githubusercontent.com/10407788/95621320-7b226080-0a3f-11eb-8194-4b55a5555836.png" style="max-width: 800px;" alt="docker-lambda"></a>
 </p>
 <p align="center">
-  <em>AWS lambda (Amazonlinux) like docker images with GDAL.</em>
+  <em>AWS Lambda (Amazonlinux) like Docker images with GDAL.</em>
 </p>
 <p align="center">
   <a href="https://github.com/lambgeo/docker-lambda/actions?query=workflow%3ACI" target="_blank">
       <img src="https://github.com/lambgeo/docker-lambda/workflows/CI/badge.svg" alt="Test">
   </a>
 </p>
+<!-- markdownlint-enable -->
 
-
-# Docker Images
+## Docker Images
 
 Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
-  - GDAL 3.6
-    - **ghcr.io/lambgeo/lambda-gdal:3.6** (Apr 2023)
+
+- GDAL 3.6
+  - **ghcr.io/lambgeo/lambda-gdal:3.6** (Apr 2023)
 
 Runtimes images:
-  - Python (based on `public.ecr.aws/lambda/python:{version}`)
-    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
-    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
-    - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11**
 
-see: https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal
+- Python (based on `public.ecr.aws/lambda/python:{version}`)
+  - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
+  - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
+  - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11**
 
-# Creating Lambda packages
+see: <https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal>
 
-## Using
+## Creating Lambda packages
 
-### 1. Create Dockerfile
+### Using
+
+#### 1. Create Dockerfile
 
 ```Dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
@@ -86,7 +89,7 @@ RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so* share
 RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip bin/gdal* bin/ogr* bin/geos* bin/nearblack
 ```
 
-### 2. Build and create package.zip
+#### 2. Build and create package.zip
 
 ```bash
 docker build --tag package:latest .
@@ -95,8 +98,10 @@ docker cp lambda:/tmp/package.zip package.zip
 docker stop lambda
 docker rm lambda
 ```
+
 Package content should be like:
-```
+
+```text
 package.zip
   |
   |___ bin/      # GDAL binaries
@@ -108,19 +113,20 @@ package.zip
   |___ other python module
 ```
 
-### 3. Deploy and Set Environment variables
+#### 3. Deploy and Set Environment variables
 
 Libraries might need to be aware of GDAL/PROJ C libraries so you **HAVE TO** to set up those 2 envs:
+
 - **GDAL_DATA:** /var/task/share/gdal
 - **PROJ_LIB:** /var/task/share/proj
 
 Other variables:
 
-Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote grids: https://proj.org/usage/network.html
+Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use [remote grids](https://proj.org/usage/network.html).
 
 ---
 
-# AWS Lambda Layers
+## AWS Lambda Layers
 
 | gdal | amazonlinux version | size (Mb) | unzipped size (Mb) | arn                                                         |
 | ---- | ------------------- | --------- | ------------------ | ----------------------------------------------------------- |
@@ -128,7 +134,8 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use remote gr
 
 see [/layer.json](/layer.json) for the list of arns
 
-##### Find the arn version
+### Find the arn version
+
 ```bash
 cat layer.json| jq '.[] | select(.region == "us-west-2")'
 {
@@ -143,7 +150,7 @@ cat layer.json| jq '.[] | select(.region == "us-west-2")'
 }
 ```
 
-#### archived layers
+### archived layers
 
 | gdal | amazonlinux version | size (Mb) | unzipped size (Mb) | arn                                                             |
 | ---- | ------------------- | --------- | ------------------ | --------------------------------------------------------------- |
@@ -157,7 +164,7 @@ see [/archived_layer.json](/archived_layer.json) for the list of arns
 
 **Layer content:**
 
-```
+```text
 layer.zip
   |
   |___ bin/      # Binaries
@@ -170,11 +177,11 @@ At Lambda runtime, the layer content will be unzipped in the `/opt` directory. T
 - **GDAL_DATA:** /opt/share/gdal
 - **PROJ_LIB:** /opt/share/proj
 
-## How To Use (Create a Lambda Package)
+### How To Use (Create a Lambda Package)
 
 There are 2 ways to use the layers:
 
-### 1. Simple (No dependencies)
+#### 1. Simple (No dependencies)
 
 If you don't need to add more runtime dependencies, you can just create a lambda package (zip file) with your lambda handler.
 
@@ -186,24 +193,24 @@ zip -r9q package.zip handler.py
 
 **Content:**
 
-```
+```text
 package.zip
   |___ handler.py   # aws lambda python handler
 ```
 
 **AWS Lambda Config:**
+
 - arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal36:1` (example)
 - env:
   - **GDAL_DATA:** /opt/share/gdal
   - **PROJ_LIB:** /opt/share/proj
 - lambda handler: `handler.handler`
 
-
-### 2. Advanced (need other dependencies)
+#### 2. Advanced (need other dependencies)
 
 If your lambda handler needs more dependencies you'll have to use the exact same environment to create the package.
 
-#### Create a Dockerfile
+##### Create a Dockerfile
 
 ```dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
@@ -239,6 +246,7 @@ RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
 - create package
+
 ```bash
 docker build --tag package:latest .
 docker run --name lambda -w /var/task -itd package:latest bash
@@ -249,7 +257,7 @@ docker rm lambda
 
 **Content:**
 
-```
+```text
 package.zip
   |___ handler.py   # aws lambda python handler
   |___ module1/     # dependencies
@@ -259,6 +267,7 @@ package.zip
 ```
 
 **AWS Lambda Config:**
+
 - arn: `arn:aws:lambda:us-east-1:524387336408:layer:gdal36:1` (example)
 - env:
   - **GDAL_DATA:** /opt/share/gdal
