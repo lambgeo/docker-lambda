@@ -1,4 +1,8 @@
 
+## 2023-12-20
+
+- update to GDAL 3.8.2
+
 ## 2023-11-28
 
 - add `yum update` and `yum clean all` to base image (author @philvarner, https://github.com/lambgeo/docker-lambda/pull/64)

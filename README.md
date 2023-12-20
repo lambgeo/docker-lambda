@@ -18,8 +18,8 @@
 
 Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
 
-- GDAL 3.8.0
-  - **ghcr.io/lambgeo/lambda-gdal:3.8** (Nov 2023)
+- GDAL 3.8.2
+  - **ghcr.io/lambgeo/lambda-gdal:3.8** (Dec 2023)
 
 Runtimes images:
 
