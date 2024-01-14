@@ -101,6 +101,7 @@ RUN mkdir /tmp/jpeg \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
   && make -j $(nproc) --silent && make install \
@@ -132,6 +133,7 @@ RUN mkdir /tmp/lerc \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
   && make -j $(nproc) --silent && make install \
@@ -175,6 +177,7 @@ RUN mkdir /tmp/openjpeg \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
   && make -j $(nproc) --silent && make install \
@@ -190,6 +193,7 @@ RUN mkdir /tmp/geos \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
   && make -j $(nproc) --silent && make install \
@@ -217,6 +221,7 @@ RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
     -DCMAKE_INSTALL_INCLUDEDIR:PATH=include \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DBUILD_TESTING=OFF \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
@@ -248,6 +253,7 @@ RUN mkdir /tmp/blosc \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
     -DCMAKE_INSTALL_RPATH="$ORIGIN" \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
     -DBUILD_SHARED=ON \
@@ -369,6 +375,7 @@ RUN mkdir /tmp/gdal \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR:PATH=lib \
+    -DCMAKE_LIBRARY_PATH:PATH=$PREFIX/lib \
     -DCMAKE_C_FLAGS="-O2 -Wl,-S" \
     -DCMAKE_CXX_FLAGS="-O2 -Wl,-S" \
     -DGDAL_SET_INSTALL_RELATIVE_RPATH=ON \
