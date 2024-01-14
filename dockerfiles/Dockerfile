@@ -384,8 +384,8 @@ RUN mkdir /tmp/gdal \
     -DGDAL_USE_LERC_INTERNAL=OFF \
     -DLERC_INCLUDE_DIR=$PREFIX/include \
     -DLERC_LIBRARY=$PREFIX/lib/libLercLib.so \
-    -DSQLITE3_INCLUDE_DIR=$PREFIX/include \
-    -DSQLITE3_LIBRARY=$PREFIX/lib/libsqlite3.so \
+    -DSQLite3_INCLUDE_DIR=$PREFIX/include \
+    -DSQLite3_LIBRARY=$PREFIX/lib/libsqlite3.so \
     -DPNG_PNG_INCLUDE_DIR=$PREFIX/include \
     -DPNG_LIBRARY_RELEASE=$PREFIX/lib/libpng.so \
     -DBUILD_PYTHON_BINDINGS=OFF \
