@@ -21,7 +21,8 @@ if [[ ! "$(ogrinfo --formats | grep 'DXF')" ]]; then echo "DXF NOK" && exit 1; f
 echo "OK"
 
 echo "Checking sqlite build"
-if [[ ! "$(ldd $PREFIX/bin/gdalwarp | grep '/opt/bin/../lib/libsqlite3')" ]]; then echo "libsql NOK" && exit 1; fi
+if [[ ! "$(ldd $PREFIX/bin/gdalwarp | grep '/opt/bin/../lib/libsqlite3')" ]]; then echo "gdalwarp libsql NOK" && exit 1; fi
+if [[ ! "$(ldd $PREFIX/lib/libgdal.so | grep '/opt/lib/libsqlite3')" ]]; then echo "libgdal libsql NOK" && exit 1; fi
 echo "OK"
 
 echo "Checking OGR"
