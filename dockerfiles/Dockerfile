@@ -181,7 +181,7 @@ RUN mkdir /tmp/openjpeg \
   && rm -rf /tmp/openjpeg
 
 # geos
-ENV GEOS_VERSION=3.11.2
+ENV GEOS_VERSION=3.12.1
 RUN mkdir /tmp/geos \
   && curl -sfL https://github.com/libgeos/geos/archive/refs/tags/${GEOS_VERSION}.tar.gz | tar zxf - -C /tmp/geos --strip-components=1 \
   && cd /tmp/geos \
@@ -207,7 +207,7 @@ RUN mkdir /tmp/geos \
 #   && make -j $(nproc) --silent && make install \
 #   && rm -rf /tmp/proj
 
-ENV PROJ_VERSION=9.2.0
+ENV PROJ_VERSION=9.3.1
 RUN mkdir /tmp/proj && mkdir /tmp/proj/data \
   && curl -sfL https://github.com/OSGeo/proj/archive/${PROJ_VERSION}.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
   && cd /tmp/proj \
