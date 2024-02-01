@@ -1,7 +1,7 @@
-ARG GDAL_VERSION
+ARG GDAL_VERSION_TAG
 ARG RUNTIME_VERSION
 
-FROM ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION} as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION_TAG} as gdal
 
 FROM public.ecr.aws/lambda/python:${RUNTIME_VERSION}
 
