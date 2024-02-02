@@ -125,7 +125,7 @@ jobs:
           for runtime in ${runtimes}; do
             docker build \
               --platform=linux/amd64 \
-              --build-arg GDAL_VERSION=${{ env.GDAL_VERSION_TAG }} \
+              --build-arg GDAL_VERSION_TAG=${{ env.GDAL_VERSION_TAG }} \
               --build-arg RUNTIME_VERSION=${runtime} \
               -f dockerfiles/runtimes/python \
               -t ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ env.GDAL_VERSION_TAG }}-python${runtime} .
