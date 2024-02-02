@@ -1,4 +1,13 @@
 
+## 2024-02-02
+
+- update versions (author @philvarner, https://github.com/lambgeo/docker-lambda/pull/76):
+    - GDAL: 3.8.3
+    - GEOS: 3.12.1
+    - PROJ: 9.3.1
+
+- fix `libsqlite3` lib links (author @jasongi, https://github.com/lambgeo/docker-lambda/pull/75)
+
 ## 2023-12-20
 
 - update to GDAL 3.8.2
