@@ -134,7 +134,7 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use [remote g
 
 | gdal | amazonlinux version | size (Mb) | unzipped size (Mb) | arn                                                         |
 | ---- | ------------------- | --------- | ------------------ | ----------------------------------------------------------- |
-| 3.8  | 3                   | TBD       | TBD                | arn:aws:lambda:{REGION}:524387336408:layer:gdal38:{VERSION} |
+| 3.8  | 4                   | TBD       | TBD                | arn:aws:lambda:{REGION}:524387336408:layer:gdal38:{VERSION} |
 
 see [/layer.json](/layer.json) for the list of arns
 
