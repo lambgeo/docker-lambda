@@ -399,6 +399,7 @@ RUN rm -f $PREFIX/lib/libturbojpeg.so* \
 
 # FIX
 RUN for i in $PREFIX/bin/*; do patchelf --force-rpath --set-rpath '$ORIGIN/../lib' $i; done
+RUN for i in $PREFIX/lib/*.so; do patchelf --force-rpath --set-rpath '$ORIGIN' $i; done
 
 # Build final image
 FROM public.ecr.aws/lambda/provided:al2 as runner
