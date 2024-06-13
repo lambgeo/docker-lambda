@@ -48,25 +48,23 @@ FROM ghcr.io/lambgeo/lambda-gdal:3.8 as gdal
 # We use the official AWS Lambda image
 FROM public.ecr.aws/lambda/{RUNTIME: python|node|go...}:{RUNTIME version}
 
-ENV PACKAGE_PREFIX=/var/task
-
 # Bring C libs from lambgeo/lambda-gdal image
-COPY --from=gdal /opt/lib/ ${PACKAGE_PREFIX}/lib/
-COPY --from=gdal /opt/include/ ${PACKAGE_PREFIX}/include/
-COPY --from=gdal /opt/share/ ${PACKAGE_PREFIX}/share/
-COPY --from=gdal /opt/bin/ ${PACKAGE_PREFIX}/bin/
+COPY --from=gdal /opt/lib/ ${LAMBDA_TASK_ROOT}/lib/
+COPY --from=gdal /opt/include/ ${LAMBDA_TASK_ROOT}/include/
+COPY --from=gdal /opt/share/ ${LAMBDA_TASK_ROOT}/share/
+COPY --from=gdal /opt/bin/ ${LAMBDA_TASK_ROOT}/bin/
 
 ENV \
-  GDAL_DATA=${PACKAGE_PREFIX}/share/gdal \
-  PROJ_LIB=${PACKAGE_PREFIX}/share/proj \
-  GDAL_CONFIG=${PACKAGE_PREFIX}/bin/gdal-config \
-  GEOS_CONFIG=${PACKAGE_PREFIX}/bin/geos-config \
-  PATH=${PACKAGE_PREFIX}/bin:$PATH
+  GDAL_DATA=${LAMBDA_TASK_ROOT}/share/gdal \
+  PROJ_LIB=${LAMBDA_TASK_ROOT}/share/proj \
+  GDAL_CONFIG=${LAMBDA_TASK_ROOT}/bin/gdal-config \
+  GEOS_CONFIG=${LAMBDA_TASK_ROOT}/bin/geos-config \
+  PATH=${LAMBDA_TASK_ROOT}/bin:$PATH
 
 # Copy local files or install modules
 
-# Create package.zip (we zip the whole content of $PACKAGE_PREFIX because we moved the gdal libs over)
-RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
+# Create package.zip (we zip the whole content of $LAMBDA_TASK_ROOT because we moved the gdal libs over)
+RUN cd $LAMBDA_TASK_ROOT && zip -r9q /tmp/package.zip *
 ```
 
 If you are working with **python3.9|3.10|3.11**, you can use lambgeo pre-build docker images:
@@ -74,20 +72,18 @@ If you are working with **python3.9|3.10|3.11**, you can use lambgeo pre-build d
 ```Dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.8-python3.10
 
-ENV PACKAGE_PREFIX=/var/task
-
 # Copy any local files to the package
-COPY handler.py ${PACKAGE_PREFIX}/handler.py
+COPY handler.py ${LAMBDA_TASK_ROOT}/handler.py
 
 # Install some requirements to `/var/task` (using `-t` otpion)
-RUN pip install numpy rasterio mercantile --no-binary :all: -t ${PACKAGE_PREFIX}/
+RUN pip install numpy rasterio mercantile --no-binary :all: -t ${LAMBDA_TASK_ROOT}/
 
 # Reduce size of the C libs
 RUN cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
 
 # Create package.zip
-# Archive python code (installed in $PACKAGE_PREFIX/)
-RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
+# Archive python code (installed in $LAMBDA_TASK_ROOT/)
+RUN cd $LAMBDA_TASK_ROOT && zip -r9q /tmp/package.zip *
 
 # Archive GDAL libs (in $PREFIX/lib $PREFIX/bin $PREFIX/share)
 RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so* share
@@ -236,18 +232,16 @@ ENV \
   GEOS_CONFIG=/opt/bin/geos-config \
   PATH=/opt/bin:$PATH
 
-ENV PACKAGE_PREFIX=/var/task
-
 # Copy local files
-COPY handler.py ${PACKAGE_PREFIX}/handler.py
+COPY handler.py ${LAMBDA_TASK_ROOT}/handler.py
 
 # install package
 # This example shows how to install GDAL python bindings for gdal 3.6
 # The GDAL version should be the same as the one provided by the `lambgeo/lambda-gdal` image
-RUN python -m pip install GDAL==$(gdal-config --version) -t $PACKAGE_PREFIX
+RUN python -m pip install GDAL==$(gdal-config --version) -t $LAMBDA_TASK_ROOT
 
 # Create package.zip
-RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
+RUN cd $LAMBDA_TASK_ROOT && zip -r9q /tmp/package.zip *
 ```
 
 - create package
