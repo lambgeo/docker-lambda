@@ -18,17 +18,23 @@
 
 Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
 
-- GDAL 3.8.3
-  - **ghcr.io/lambgeo/lambda-gdal:3.8** (Fev 2024)
+- GDAL 3.10.2
+  - **ghcr.io/lambgeo/lambda-gdal:3.10.2** (Feb 2025)
 
 Runtimes images:
 
 - Python (based on `public.ecr.aws/lambda/python:{version}`)
+  - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.9**
+  - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.10**
+  - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.11**
+  - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.12**
+  - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.13**
+
+**archived**
+  - **ghcr.io/lambgeo/lambda-gdal:3.8**
   - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.9**
   - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.10**
   - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.11**
-
-**archived**
   - **ghcr.io/lambgeo/lambda-gdal:3.6**
   - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
   - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
@@ -43,7 +49,7 @@ see: <https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal>
 #### 1. Create Dockerfile
 
 ```Dockerfile
-FROM ghcr.io/lambgeo/lambda-gdal:3.8 AS gdal
+FROM ghcr.io/lambgeo/lambda-gdal:3.10 AS gdal
 
 # We use the official AWS Lambda image
 FROM public.ecr.aws/lambda/{RUNTIME: python|node|go...}:{RUNTIME version}
