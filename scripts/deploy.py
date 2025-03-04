@@ -26,18 +26,23 @@ AWS_REGIONS = [
 
 
 CompatibleRuntimes_al2 = [
-    "nodejs12.x",
-    "nodejs14.x",
-    "nodejs16.x",
+    "nodejs22.x",
+    "nodejs20.x",
+    "nodejs18.x",
+    "python3.13",
+    "python3.12",
+    "python3.11",
+    "python3.10",
+    "python3.9",
+    "java21",
+    "java17",
     "java11",
     "java8.al2",
-    "python3.8",
-    "python3.9",
-    "python3.10",
-    "python3.11",
+    "dotnet8",
     "dotnet6",
-    "dotnetcore3.1",
-    "ruby2.7",
+    "ruby3.3",
+    "ruby3.2",
+    "provided.al2023",
     "provided.al2",
 ]
 
