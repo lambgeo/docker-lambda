@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Install dependencies
         run: |
@@ -121,7 +121,7 @@ jobs:
 
       - name: Build Runtime and Push Python <=3.11 with yum
         run: |
-          runtimes='3.9 3.10 3.11'
+          runtimes='3.10 3.11'
           for runtime in ${runtimes}; do
             docker build \
               --platform=linux/amd64 \
