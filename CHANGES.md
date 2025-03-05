@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add support for Python 3.12 and 3.13
+- Remove support for Python 3.9
 - Update deploy.py script compatible runtimes list to currently-available runtimes
 
 ## 2024-02-02.patch1
