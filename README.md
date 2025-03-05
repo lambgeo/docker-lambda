@@ -1,5 +1,3 @@
-
-
 <!-- markdownlint-disable MD033 -->
 <p align="center">
   <img src="https://user-images.githubusercontent.com/10407788/95621320-7b226080-0a3f-11eb-8194-4b55a5555836.png" style="max-width: 800px;" alt="docker-lambda"></a>
@@ -14,14 +12,16 @@
 </p>
 <!-- markdownlint-enable -->
 
-# Docker Images
+# Docker Lambda
+
+## Docker Images
 
 Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
 
 - GDAL 3.10.2
   - **ghcr.io/lambgeo/lambda-gdal:3.10.2** (Feb 2025)
 
-Runtimes images:
+### Current images
 
 - Python (based on `public.ecr.aws/lambda/python:{version}`)
   - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.9**
@@ -30,15 +30,18 @@ Runtimes images:
   - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.12**
   - **ghcr.io/lambgeo/lambda-gdal:3.10-python3.13**
 
-**archived**
-  - **ghcr.io/lambgeo/lambda-gdal:3.8**
-  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.9**
-  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.10**
-  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.11**
-  - **ghcr.io/lambgeo/lambda-gdal:3.6**
-  - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
-  - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
-  - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11**
+## Archived images
+
+- **ghcr.io/lambgeo/lambda-gdal:3.8**
+- **ghcr.io/lambgeo/lambda-gdal:3.8-python3.9**
+- **ghcr.io/lambgeo/lambda-gdal:3.8-python3.10**
+- **ghcr.io/lambgeo/lambda-gdal:3.8-python3.11**
+- **ghcr.io/lambgeo/lambda-gdal:3.8-python3.12**
+- **ghcr.io/lambgeo/lambda-gdal:3.8-python3.13**
+- **ghcr.io/lambgeo/lambda-gdal:3.6**
+- **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
+- **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
+- **ghcr.io/lambgeo/lambda-gdal:3.6-python3.11**
 
 see: <https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal>
 
@@ -75,7 +78,7 @@ ENV \
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
-If you are working with **python3.9|3.10|3.11|3.12|3.13**, you can use lambgeo pre-build docker images:
+If you are working with **python3.10|3.11|3.12|3.13**, you can use lambgeo pre-build docker images:
 
 ```Dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.8-python3.10
@@ -134,7 +137,6 @@ Libraries might need to be aware of GDAL/PROJ C libraries so you **HAVE TO** to 
 Other variables:
 
 Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use [remote grids](https://proj.org/usage/network.html).
-
 
 # AWS Lambda Layers
 
