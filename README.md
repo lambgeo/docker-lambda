@@ -45,7 +45,7 @@ Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
 
 see: <https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal>
 
-### Creating Lambda packages
+## Creating Lambda packages
 
 ### Using
 
@@ -138,7 +138,7 @@ Other variables:
 
 Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use [remote grids](https://proj.org/usage/network.html).
 
-# AWS Lambda Layers
+## AWS Lambda Layers
 
 | gdal | amazonlinux version | size (Mb) | unzipped size (Mb) | arn                                                         |
 | ---- | ------------------- | --------- | ------------------ | ----------------------------------------------------------- |
@@ -146,7 +146,7 @@ Starting with gdal3.1 (PROJ 7.1), you can set `PROJ_NETWORK=ON` to use [remote g
 
 see [/layer.json](/layer.json) for the list of arns
 
-### Find the arn version
+### Find the ARN version
 
 ```bash
 cat layer.json| jq '.[] | select(.region == "us-west-2")'
@@ -286,3 +286,13 @@ package.zip
   - **GDAL_DATA:** /opt/share/gdal
   - **PROJ_LIB:** /opt/share/proj
 - lambda handler: `handler.handler`
+
+## Building locally for testing
+
+To run the image build locally, execute the script `scripts/build.sh` with
+three arguments of (1) the GDAL version, (2) the runtime platform, and (3)
+the version of the runtime platform:
+
+```commandline
+./scripts/build.sh 3.10.2 python 3.13
+```

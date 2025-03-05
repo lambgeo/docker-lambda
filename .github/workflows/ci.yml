@@ -15,8 +15,8 @@ on:
   pull_request:
 
 env:
-  GDAL_VERSION: 3.10.2
-  GDAL_VERSION_TAG: 3.10
+  GDAL_VERSION: 3.9.3 # 3.10.2
+  GDAL_VERSION_TAG: 3.9
 
 jobs:
   build:
