@@ -24,11 +24,13 @@ Based on `public.ecr.aws/lambda/provided:al2` (AmazonLinux 2)
 Runtimes images:
 
 - Python (based on `public.ecr.aws/lambda/python:{version}`)
-  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.9**
   - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.10**
   - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.11**
+  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.12**
+  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.13**
 
 **archived**
+  - **ghcr.io/lambgeo/lambda-gdal:3.8-python3.9**
   - **ghcr.io/lambgeo/lambda-gdal:3.6**
   - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.9**
   - **ghcr.io/lambgeo/lambda-gdal:3.6-python3.10**
@@ -69,7 +71,7 @@ ENV \
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
-If you are working with **python3.9|3.10|3.11|3.12|3.13**, you can use lambgeo pre-build docker images:
+If you are working with **python3.10|3.11|3.12|3.13**, you can use lambgeo pre-build docker images:
 
 ```Dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.8-python3.10
