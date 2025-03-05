@@ -43,7 +43,7 @@ see: <https://github.com/lambgeo/docker-lambda/pkgs/container/lambda-gdal>
 #### 1. Create Dockerfile
 
 ```Dockerfile
-FROM ghcr.io/lambgeo/lambda-gdal:3.8 as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:3.8 AS gdal
 
 # We use the official AWS Lambda image
 FROM public.ecr.aws/lambda/{RUNTIME: python|node|go...}:{RUNTIME version}
@@ -69,7 +69,7 @@ ENV \
 RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
 ```
 
-If you are working with **python3.9|3.10|3.11**, you can use lambgeo pre-build docker images:
+If you are working with **python3.9|3.10|3.11|3.12|3.13**, you can use lambgeo pre-build docker images:
 
 ```Dockerfile
 FROM ghcr.io/lambgeo/lambda-gdal:3.8-python3.10
@@ -218,7 +218,7 @@ If your lambda handler needs more dependencies you'll have to use the exact same
 ##### Create a Dockerfile
 
 ```dockerfile
-FROM ghcr.io/lambgeo/lambda-gdal:3.8 as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:3.8 AS gdal
 
 # This example assume that you are creating a lambda package for python 3.10
 FROM public.ecr.aws/lambda/python:3.10

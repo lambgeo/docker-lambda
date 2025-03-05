@@ -119,7 +119,7 @@ jobs:
             /local/scripts/create-layer.sh
           python scripts/deploy.py ${{ env.GDAL_VERSION_TAG }} --deploy
 
-      - name: Build Runtime and Push
+      - name: Build Runtime and Push Python <=3.11 with yum
         run: |
           runtimes='3.9 3.10 3.11'
           for runtime in ${runtimes}; do
@@ -127,6 +127,23 @@ jobs:
               --platform=linux/amd64 \
               --build-arg GDAL_VERSION_TAG=${{ env.GDAL_VERSION_TAG }} \
               --build-arg RUNTIME_VERSION=${runtime} \
+              --build-arg NUMPY_VERSION=1.25 \
+              --build-arg PKG_INSTALLER=yum \
+              -f dockerfiles/runtimes/python \
+              -t ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ env.GDAL_VERSION_TAG }}-python${runtime} .
+            docker push ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ env.GDAL_VERSION_TAG }}-python${runtime}
+          done
+
+      - name: Build Runtime and Push Python >= 3.12 with dnf
+        run: |
+          runtimes='3.12 3.13'
+          for runtime in ${runtimes}; do
+            docker build \
+              --platform=linux/amd64 \
+              --build-arg GDAL_VERSION_TAG=${{ env.GDAL_VERSION_TAG }} \
+              --build-arg RUNTIME_VERSION=${runtime} \
+              --build-arg NUMPY_VERSION=1.26 \
+              --build-arg PKG_INSTALLER=dnf \
               -f dockerfiles/runtimes/python \
               -t ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ env.GDAL_VERSION_TAG }}-python${runtime} .
             docker push ghcr.io/${{ github.repository_owner }}/lambda-gdal:${{ env.GDAL_VERSION_TAG }}-python${runtime}
