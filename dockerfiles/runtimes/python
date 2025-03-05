@@ -1,9 +1,11 @@
-ARG GDAL_VERSION_TAG
-ARG RUNTIME_VERSION
+ARG GDAL_VERSION_TAG=x
+ARG RUNTIME_VERSION=x
 
-FROM ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION_TAG} as gdal
+FROM ghcr.io/lambgeo/lambda-gdal:${GDAL_VERSION_TAG} AS gdal
 
 FROM public.ecr.aws/lambda/python:${RUNTIME_VERSION}
+ARG PKG_INSTALLER
+ARG NUMPY_VERSION
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
@@ -12,19 +14,19 @@ ENV \
   LC_ALL=en_US.UTF-8 \
   CFLAGS="--std=c99"
 
-RUN yum install -y gcc gcc-c++ && \
-    yum clean all && \
-    rm -rf /var/cache/yum /var/lib/yum/history
+RUN ${PKG_INSTALLER} install -y gcc gcc-c++ && \
+    ${PKG_INSTALLER} clean all
 
 RUN \
     python -m pip install pip -U \
-    && python -m pip install cython numpy==1.25 wheel --no-binary numpy
+    && python -m pip install --upgrade setuptools \
+    && python -m pip install cython numpy==${NUMPY_VERSION} wheel --no-binary numpy
 
 # The PREFIX should be the same as in gdal{version}:latest
 # When building rasterio, setup.py will get libs directoy from gdal-config
 # $ gdal-config --libs
 # -L/opt/lib -lgdal
-ENV PREFIX /opt
+ENV PREFIX=/opt
 
 COPY --from=gdal /opt/lib/ $PREFIX/lib/
 COPY --from=gdal /opt/include/ $PREFIX/include/
@@ -42,4 +44,4 @@ RUN export GDAL_VERSION=$(gdal-config --version)
 
 RUN mkdir ${PREFIX}/python
 
-ENTRYPOINT bash
+ENTRYPOINT [ "bash" ]

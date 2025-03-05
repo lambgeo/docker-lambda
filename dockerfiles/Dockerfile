@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/provided:al2 as builder
+FROM public.ecr.aws/lambda/provided:al2 AS builder
 
 LABEL maintainer="lambgeo <geolambdas@gmail.com>"
 
@@ -402,7 +402,7 @@ RUN for i in $PREFIX/bin/*; do patchelf --force-rpath --set-rpath '$ORIGIN/../li
 RUN for i in $PREFIX/lib/*.so; do patchelf --force-rpath --set-rpath '$ORIGIN' $i; done
 
 # Build final image
-FROM public.ecr.aws/lambda/provided:al2 as runner
+FROM public.ecr.aws/lambda/provided:al2 AS runner
 
 ENV PREFIX /opt
 COPY --from=builder /opt/lib/ $PREFIX/lib/
