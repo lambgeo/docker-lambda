@@ -15,8 +15,8 @@ on:
   pull_request:
 
 env:
-  GDAL_VERSION: 3.8.3
-  GDAL_VERSION_TAG: 3.8
+  GDAL_VERSION: 3.9.3 # 3.10.2
+  GDAL_VERSION_TAG: 3.9
 
 jobs:
   build:
@@ -121,7 +121,7 @@ jobs:
 
       - name: Build Runtime and Push Python <=3.11 with yum
         run: |
-          runtimes='3.9 3.10 3.11'
+          runtimes='3.10 3.11'
           for runtime in ${runtimes}; do
             docker build \
               --platform=linux/amd64 \

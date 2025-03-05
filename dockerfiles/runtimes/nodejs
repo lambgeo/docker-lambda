@@ -16,7 +16,7 @@ ENV \
 # When building rasterio, setup.py will get libs directoy from gdal-config
 # $ gdal-config --libs
 # -L/opt/lib -lgdal
-ENV PREFIX /opt
+ENV PREFIX=/opt
 
 COPY --from=gdal /opt/lib/ $PREFIX/lib/
 COPY --from=gdal /opt/include/ $PREFIX/include/

@@ -10,11 +10,11 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/yum /var/lib/yum/history
 
-ENV PREFIX /opt
+ENV PREFIX=/opt
 
 WORKDIR /opt
 
-ENV LD_LIBRARY_PATH $PREFIX/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
 
 # pkg-config
 ENV PKGCONFIG_VERSION=0.29.2
@@ -404,7 +404,7 @@ RUN for i in $PREFIX/lib/*.so; do patchelf --force-rpath --set-rpath '$ORIGIN' $
 # Build final image
 FROM public.ecr.aws/lambda/provided:al2 AS runner
 
-ENV PREFIX /opt
+ENV PREFIX=/opt
 COPY --from=builder /opt/lib/ $PREFIX/lib/
 COPY --from=builder /opt/include/ $PREFIX/include/
 COPY --from=builder /opt/share/ $PREFIX/share/

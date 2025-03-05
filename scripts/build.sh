@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+# set -x # print each command before executing
 
 GDAL_VERSION=$1
 GDAL_VERSION_TAG=${GDAL_VERSION%.*}
